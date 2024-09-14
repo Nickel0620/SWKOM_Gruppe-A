@@ -1,6 +1,6 @@
 ﻿services:
   dms-api:
-    image: mcr.microsoft.com/dotnet/aspnet:7.0
+    image: mcr.microsoft.com/dotnet/aspnet:8.0
     container_name: dms-api
     build:
       context: .
