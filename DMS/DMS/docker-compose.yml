@@ -1,6 +1,4 @@
-﻿version: '3.8'
-
-services:
+﻿services:
   dms-api:
     image: mcr.microsoft.com/dotnet/aspnet:7.0
     container_name: dms-api
@@ -11,8 +9,6 @@ services:
       - "8081:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-    volumes:
-      - ./app:/app
     depends_on:
       - dms-db
 
