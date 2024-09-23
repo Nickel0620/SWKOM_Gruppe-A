@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace DMS.Controllers
+namespace REST_API.Controllers
 {
     [ApiController]
     [Route("")]

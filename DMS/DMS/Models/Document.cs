@@ -1,4 +1,4 @@
-﻿namespace DMS.Models
+﻿namespace REST_API.Models
 {
     public class Document
     {
