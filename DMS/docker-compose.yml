@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  dms:
+    image: ${DOCKER_REGISTRY-}dms
+    build:
+      context: .
+      dockerfile: DMS/Dockerfile
