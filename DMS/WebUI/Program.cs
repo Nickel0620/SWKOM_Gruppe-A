@@ -1,34 +1,16 @@
-namespace WebUI
-{
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            builder.Services.AddRazorPages();
+// Füge statische Dateien hinzu
+builder.Services.AddControllersWithViews();
 
-            var app = builder.Build();
+var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
+// Aktiviere die Verwendung von statischen Dateien
+app.UseStaticFiles();
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
+// Aktiviere den Routing-Support
+app.UseRouting();
 
-            app.UseRouting();
+app.MapGet("/", () => Results.Redirect("/index.html")); // Weiterleitung auf die Hauptseite
 
-            app.UseAuthorization();
-
-            app.MapRazorPages();
-
-            app.Run();
-        }
-    }
-}
+app.Run();

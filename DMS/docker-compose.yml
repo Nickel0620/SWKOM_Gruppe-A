@@ -1,6 +1,6 @@
 services:
   rest_api:
-    image: rest_api
+    image: rest_api_image
     build:
       context: ./REST_API
       dockerfile: Dockerfile
@@ -24,7 +24,7 @@ services:
   #     - db-data:/var/lib/postgresql/data
 
   webui:
-    image: webui_api_image
+    image: web_ui_image
     build:
       context: ./WebUI
       dockerfile: Dockerfile
