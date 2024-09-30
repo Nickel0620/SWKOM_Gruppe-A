@@ -10,7 +10,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Copy the .csproj file and restore dependencies
-COPY ["DMS.csproj", "./"]
+COPY ["REST_API.csproj", "./"]
 RUN dotnet restore
 
 # Copy the rest of the project files
@@ -30,4 +30,4 @@ WORKDIR /app
 COPY --from=build /app/publish .
 
 # Entry point to run the application
-ENTRYPOINT ["dotnet", "DMS.dll"]
+ENTRYPOINT ["dotnet", "REST_API.dll"]

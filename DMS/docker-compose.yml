@@ -1,6 +1,6 @@
 services:
   rest_api:
-    image: rest_api
+    image: rest_api_image
     build:
       context: ./REST_API
       dockerfile: Dockerfile
@@ -9,24 +9,24 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080/
-    depends_on:
-      - dms-db
+    # depends_on:
+    #   - dms-db
 
-  dms-db:
-    image: db_image
-    environment:
-      POSTGRES_USER: dmsuser
-      POSTGRES_PASSWORD: dmspassword
-      POSTGRES_DB: dmsdb
-    ports:
-      - "5432:5432"
-    volumes:
-      - db-data:/var/lib/postgresql/data
+  # dms-db:
+  #   image: db_image
+  #   environment:
+  #     POSTGRES_USER: dmsuser
+  #     POSTGRES_PASSWORD: dmspassword
+  #     POSTGRES_DB: dmsdb
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - db-data:/var/lib/postgresql/data
 
   webui:
-    image: webui_api_image
+    image: web_ui_image
     build:
-      context: ./WEB_UI
+      context: ./WebUI
       dockerfile: Dockerfile
     ports:
       - "80:80"
