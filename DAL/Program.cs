@@ -1,23 +1,8 @@
-using DAL.Context;
-using DAL.Repositories;
-using Microsoft.EntityFrameworkCore;
-
-
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-// Register DbContext to use PostgreSQL with the DocumentContext from DAL
-builder.Services.AddDbContext<DocumentContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// Register the repository from DAL
-builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
-
-// Add controllers
 builder.Services.AddControllers();
-
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -38,4 +23,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-

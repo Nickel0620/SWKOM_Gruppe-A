@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "REST_API", "REST_API\REST_A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebUI", "WebUI\WebUI.csproj", "{C5EBC283-0386-4CDA-9F84-6841A19B1BFE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAL", "..\DAL\DAL.csproj", "{EC07AC73-D0CF-4963-AB0C-763862318D9A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{C5EBC283-0386-4CDA-9F84-6841A19B1BFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5EBC283-0386-4CDA-9F84-6841A19B1BFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5EBC283-0386-4CDA-9F84-6841A19B1BFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC07AC73-D0CF-4963-AB0C-763862318D9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC07AC73-D0CF-4963-AB0C-763862318D9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC07AC73-D0CF-4963-AB0C-763862318D9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC07AC73-D0CF-4963-AB0C-763862318D9A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

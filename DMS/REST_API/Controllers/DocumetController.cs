@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using REST_API.Models;
+using DAL.Entities;
+using DAL.Repositories;
+using Microsoft.AspNetCore.Mvc;
+
 
 namespace REST_API.Controllers
 {
@@ -7,58 +10,56 @@ namespace REST_API.Controllers
     [Route("[controller]")]
     public class DocumentController : ControllerBase
     {
-        private static readonly List<Document> Documents = new List<Document>
-        {
-            new Document { Id = 1, Title = "Sample Document 1", Content = "This is the first sample document." },
-            new Document { Id = 2, Title = "Sample Document 2", Content = "This is the second sample document." }
-        };
-
+        private readonly IDocumentRepository _documentRepository;
         private readonly ILogger<DocumentController> _logger;
 
-        public DocumentController(ILogger<DocumentController> logger)
+        public DocumentController(IDocumentRepository documentRepository, ILogger<DocumentController> logger)
         {
+            _documentRepository = documentRepository;
             _logger = logger;
         }
 
+        // GET: /document
         [HttpGet(Name = "GetDocuments")]
-        public IEnumerable<Document> Get()
+        public async Task<ActionResult<IEnumerable<Document>>> Get()
         {
-            return Documents;
+            var documents = await _documentRepository.GetAllDocumentsAsync();
+            return Ok(documents);
         }
 
+        // GET: /document/{id}
         [HttpGet("{id}", Name = "GetDocumentById")]
-        public ActionResult<Document> GetById(int id)
+        public async Task<ActionResult<Document>> GetById(int id)
         {
-            var document = Documents.FirstOrDefault(d => d.Id == id);
+            var document = await _documentRepository.GetDocumentByIdAsync(id);
             if (document == null)
             {
                 return NotFound();
             }
 
-            return document;
+            return Ok(document);
         }
 
+        // POST: /document
         [HttpPost(Name = "CreateDocument")]
-        public ActionResult<Document> Post([FromBody] Document newDocument)
+        public async Task<ActionResult<Document>> Post([FromBody] Document newDocument)
         {
-            newDocument.Id = Documents.Count + 1;
-            Documents.Add(newDocument);
-
+            await _documentRepository.AddDocumentAsync(newDocument);
             return CreatedAtAction(nameof(GetById), new { id = newDocument.Id }, newDocument);
         }
 
+        // DELETE: /document/{id}
         [HttpDelete("{id}", Name = "DeleteDocument")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var document = Documents.FirstOrDefault(d => d.Id == id);
+            var document = await _documentRepository.GetDocumentByIdAsync(id);
             if (document == null)
             {
                 return NotFound();
             }
 
-            Documents.Remove(document);
+            await _documentRepository.DeleteDocumentAsync(id);
             return NoContent();
         }
     }
 }
-
