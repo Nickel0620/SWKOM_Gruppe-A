@@ -43,6 +43,9 @@ namespace REST_API.Controllers
         [HttpPost(Name = "CreateDocument")]
         public async Task<ActionResult<Document>> Post([FromBody] Document newDocument)
         {
+            newDocument.CreatedAt = DateTime.UtcNow; // Set to UTC
+            newDocument.UpdatedAt = DateTime.UtcNow; // Set to UTC
+
             await _documentRepository.AddDocumentAsync(newDocument);
             return CreatedAtAction(nameof(GetById), new { id = newDocument.Id }, newDocument);
         }
