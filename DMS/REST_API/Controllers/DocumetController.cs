@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DAL.Entities;
 using DAL.Repositories;
-using Microsoft.AspNetCore.Mvc;
 
 
 namespace REST_API.Controllers

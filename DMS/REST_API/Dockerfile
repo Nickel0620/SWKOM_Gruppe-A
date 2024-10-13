@@ -9,14 +9,14 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Copy the .csproj file and restore dependencies
-COPY ["REST_API.csproj", "./"]
-RUN dotnet restore
-
 # Copy the rest of the project files
 COPY . .
 
-# Build the project
+# Restore dependencies for the solution
+WORKDIR /src/REST_API
+RUN dotnet restore
+
+# Build the REST_API project
 RUN dotnet build -c $BUILD_CONFIGURATION -o /app/build
 
 # Publish the project to /app/publish
