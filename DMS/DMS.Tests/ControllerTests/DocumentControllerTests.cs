@@ -25,6 +25,8 @@ namespace DMS.Tests.ControllerTests
             _controller = new DocumentController(_mockRepository.Object, _mockMapper.Object, _mockLogger.Object);
         }
 
+        #region GET Tests
+
         [Fact]
         public async Task Get_ReturnsOkResult_WithDocuments()
         {
@@ -85,6 +87,10 @@ namespace DMS.Tests.ControllerTests
             Assert.Equal("Doc1", returnValue.Title);
         }
 
+        #endregion
+
+        #region POST Tests
+
         [Fact]
         public async Task Post_ReturnsCreatedAtAction_WhenDocumentIsValid()
         {
@@ -109,6 +115,10 @@ namespace DMS.Tests.ControllerTests
             Assert.Equal(documentDTO.Title, returnedDTO.Title);
             Assert.Equal(documentDTO.Content, returnedDTO.Content);
         }
+
+        #endregion
+
+        #region DELETE Tests
 
         [Fact]
         public async Task Delete_ReturnsNotFound_WhenDocumentDoesNotExist()
@@ -137,5 +147,79 @@ namespace DMS.Tests.ControllerTests
             Assert.IsType<NoContentResult>(result);
             _mockRepository.Verify(repo => repo.DeleteDocumentAsync(1), Times.Once);
         }
+
+        #endregion
+
+        #region PUT Tests
+
+        [Fact]
+        public async Task Put_ReturnsNoContent_WhenDocumentIsValidAndExists()
+        {
+            // Arrange
+            int documentId = 1;
+            var existingDocument = new Document { Id = documentId, Title = "Old Title", Content = "Old Content" };
+            var updatedDocumentDTO = new DocumentDTO { Title = "New Title", Content = "New Content" };
+
+            _mockRepository.Setup(repo => repo.GetDocumentByIdAsync(documentId)).ReturnsAsync(existingDocument);
+            _mockMapper.Setup(m => m.Map<Document>(updatedDocumentDTO)).Returns(existingDocument);
+            _mockRepository.Setup(repo => repo.UpdateDocumentAsync(existingDocument)).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _controller.Put(documentId, updatedDocumentDTO);
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+            Assert.Equal("New Title", existingDocument.Title);
+            Assert.Equal("New Content", existingDocument.Content);
+            _mockRepository.Verify(repo => repo.UpdateDocumentAsync(existingDocument), Times.Once);
+        }
+
+        [Fact]
+        public async Task Put_ReturnsBadRequest_WhenIdIsInvalid()
+        {
+            // Arrange
+            var documentDTO = new DocumentDTO { Title = "Doc1", Content = "Content1" };
+
+            // Act
+            var result = await _controller.Put(0, documentDTO); // Invalid ID
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+            var badRequestResult = result as BadRequestObjectResult;
+            Assert.Equal("Invalid document ID.", badRequestResult.Value);
+        }
+
+        [Fact]
+        public async Task Put_ReturnsNotFound_WhenDocumentDoesNotExist()
+        {
+            // Arrange
+            int documentId = 1;
+            var documentDTO = new DocumentDTO { Title = "New Title", Content = "New Content" };
+
+            _mockRepository.Setup(repo => repo.GetDocumentByIdAsync(documentId)).ReturnsAsync((Document)null); // No document found
+
+            // Act
+            var result = await _controller.Put(documentId, documentDTO);
+
+            // Assert
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task Put_ReturnsBadRequest_WhenModelStateIsInvalid()
+        {
+            // Arrange
+            var documentDTO = new DocumentDTO(); // Invalid state (assuming Title and Content are required)
+
+            _controller.ModelState.AddModelError("Title", "The Title field is required."); // Simulating validation error
+
+            // Act
+            var result = await _controller.Put(1, documentDTO);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        #endregion
     }
 }

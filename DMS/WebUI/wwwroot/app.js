@@ -45,7 +45,7 @@ async function fetchDocuments() {
                                 <p class="card-text">${doc.content}</p>
                             </div>
 
-                            <!-- Second Column for ID, Created, Last Updated, and Delete Button -->
+                            <!-- Second Column for ID, Created, Last Updated, and Buttons -->
                             <div class="col-md-4 border-left">
                                 <div class="row">
                                     <div class="col text-right">
@@ -64,6 +64,8 @@ async function fetchDocuments() {
                                 </div>
                                 <div class="row mt-auto">
                                     <div class="col text-right margin-top">
+                                        <!-- Edit Button -->
+                                        <button class="btn btn-info text-uppercase" onclick="openEditModal(${doc.id}, '${doc.title}', '${doc.content}')">Edit</button>
                                         <!-- Delete Button -->
                                         <button class="btn btn-danger text-uppercase" onclick="deleteDocument(${doc.id})">Delete</button>
                                     </div>
@@ -71,7 +73,7 @@ async function fetchDocuments() {
                             </div>
                         </div>
                     </div>
-                `;
+`;
                 documentList.appendChild(card);
             });
         }
@@ -165,6 +167,60 @@ async function deleteDocument(id) {
         showAlert('Error deleting document: ' + error.message, 'danger');
     }
 }
+
+// Function to open the edit modal and populate the fields
+function openEditModal(id, title, content) {
+    // Set the values in the modal
+    document.getElementById('editDocTitle').value = title;
+    document.getElementById('editDocContent').value = content;
+
+    // Store the document ID to be edited in a global variable
+    window.currentEditDocumentId = id;
+
+    // Show the modal
+    $('#editDocumentModal').modal('show');
+}
+
+// Save changes when the Save button is clicked
+document.getElementById('saveChangesButton').addEventListener('click', async () => {
+    const title = document.getElementById('editDocTitle').value;
+    const content = document.getElementById('editDocContent').value;
+
+    console.log("Updating Document:", { id: window.currentEditDocumentId, title, content });
+
+    try {
+        const response = await fetch(`http://localhost:8081/document/${window.currentEditDocumentId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ title, content })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            const validationMessages = errorData.errors
+                ? Object.values(errorData.errors).flat()
+                : ['Failed to update document: ' + response.statusText];
+
+            // Display the validation errors using Bootstrap alert
+            showAlert(validationMessages, 'danger');
+            return;
+        }
+
+        // Refresh the document list
+        await fetchDocuments();
+
+        // Close the modal
+        $('#editDocumentModal').modal('hide');
+
+        // Show success message
+        showAlert('Document updated successfully!', 'success');
+    } catch (error) {
+        console.error('Error updating document:', error);
+        showAlert('Error updating document: ' + error.message, 'danger');
+    }
+});
 
 // Function to display Bootstrap alerts
 function showAlert(messages, type) {

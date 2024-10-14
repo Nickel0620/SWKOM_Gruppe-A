@@ -82,5 +82,34 @@ namespace REST_API.Controllers
             await _documentRepository.DeleteDocumentAsync(id);
             return NoContent();
         }
+
+        // PUT: /document/{id}
+        [HttpPut("{id}", Name = "UpdateDocument")]
+        public async Task<IActionResult> Put(int id, [FromBody] DocumentDTO documentDTO)
+        {
+            if (id <= 0) // Simple validation
+            {
+                return BadRequest("Invalid document ID.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState); // Return validation errors
+            }
+
+            var existingDocument = await _documentRepository.GetDocumentByIdAsync(id);
+            if (existingDocument == null)
+            {
+                return NotFound(); // Return 404 if document does not exist
+            }
+
+            // Map updated properties
+            existingDocument.Title = documentDTO.Title;
+            existingDocument.Content = documentDTO.Content;
+            existingDocument.UpdatedAt = DateTime.UtcNow; // Update the last modified date
+
+            await _documentRepository.UpdateDocumentAsync(existingDocument);
+            return NoContent(); // Return 204 No Content on successful update
+        }
     }
 }
