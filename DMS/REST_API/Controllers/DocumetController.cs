@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DAL.Entities;
 using DAL.Repositories;
+using AutoMapper;
+using REST_API.DTOs;
 
 
 namespace REST_API.Controllers
@@ -10,11 +12,13 @@ namespace REST_API.Controllers
     public class DocumentController : ControllerBase
     {
         private readonly IDocumentRepository _documentRepository;
+        private readonly IMapper _mapper;
         private readonly ILogger<DocumentController> _logger;
 
-        public DocumentController(IDocumentRepository documentRepository, ILogger<DocumentController> logger)
+        public DocumentController(IDocumentRepository documentRepository, IMapper mapper, ILogger<DocumentController> logger)
         {
             _documentRepository = documentRepository;
+            _mapper = mapper;
             _logger = logger;
         }
 
@@ -23,7 +27,8 @@ namespace REST_API.Controllers
         public async Task<ActionResult<IEnumerable<Document>>> Get()
         {
             var documents = await _documentRepository.GetAllDocumentsAsync();
-            return Ok(documents);
+            var documentDTOs = _mapper.Map<IEnumerable<DocumentDTO>>(documents);
+            return Ok(documentDTOs);
         }
 
         // GET: /document/{id}
@@ -36,28 +41,42 @@ namespace REST_API.Controllers
                 return NotFound();
             }
 
-            return Ok(document);
+            var documentDTO = _mapper.Map<DocumentDTO>(document);
+            return Ok(documentDTO);
         }
 
         // POST: /document
         [HttpPost(Name = "CreateDocument")]
-        public async Task<ActionResult<Document>> Post([FromBody] Document newDocument)
+        public async Task<ActionResult<DocumentDTO>> Post([FromBody] DocumentDTO documentDTO)
         {
-            newDocument.CreatedAt = DateTime.UtcNow; // Set to UTC
-            newDocument.UpdatedAt = DateTime.UtcNow; // Set to UTC
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState); // Return validation errors
+            }
 
-            await _documentRepository.AddDocumentAsync(newDocument);
-            return CreatedAtAction(nameof(GetById), new { id = newDocument.Id }, newDocument);
+            var document = _mapper.Map<Document>(documentDTO);
+            document.CreatedAt = DateTime.UtcNow;
+            document.UpdatedAt = DateTime.UtcNow;
+
+            await _documentRepository.AddDocumentAsync(document);
+            var createdDocumentDTO = _mapper.Map<DocumentDTO>(document); // Map the created Document back to DocumentDTO
+
+            return CreatedAtAction(nameof(GetById), new { id = document.Id }, createdDocumentDTO);
         }
 
         // DELETE: /document/{id}
         [HttpDelete("{id}", Name = "DeleteDocument")]
         public async Task<IActionResult> Delete(int id)
         {
+            if (id <= 0) // Simple validation
+            {
+                return BadRequest("Invalid document ID.");
+            }
+
             var document = await _documentRepository.GetDocumentByIdAsync(id);
             if (document == null)
             {
-                return NotFound();
+                return NotFound(); // Return 404
             }
 
             await _documentRepository.DeleteDocumentAsync(id);

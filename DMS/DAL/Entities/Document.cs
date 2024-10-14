@@ -6,7 +6,8 @@ namespace DAL.Entities
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "The Title field is required.")]
+        [StringLength(100, ErrorMessage = "The Title cannot exceed 100 characters.")]
         public string Title { get; set; }
 
         public string Content { get; set; }

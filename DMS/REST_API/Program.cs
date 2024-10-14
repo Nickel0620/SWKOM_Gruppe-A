@@ -1,10 +1,24 @@
 using DAL.Context;
 using DAL.Repositories;
 using Microsoft.EntityFrameworkCore;
-
+using AutoMapper;
+using REST_API.MappingProfiles;
+using REST_API.DTOs;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Register AutoMapper
+builder.Services.AddAutoMapper(typeof(DocumentProfile));
+
+// Register FluentValidation
+builder.Services.AddFluentValidationAutoValidation()
+                .AddFluentValidationClientsideAdapters();
+
+builder.Services.AddValidatorsFromAssemblyContaining<DocumentDTOValidator>();
+
 
 // Add services to the container.
 

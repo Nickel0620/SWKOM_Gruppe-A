@@ -1,4 +1,5 @@
-﻿async function fetchHelloWorld() {
+﻿// test for the REST API
+async function fetchHelloWorld() {
     const messageElement = document.getElementById('message');
     messageElement.textContent = 'Loading...';  // Initial loading message
     try {
@@ -14,9 +15,11 @@
     }
 }
 
+// Fetch the documents from the API and display them in a list
 async function fetchDocuments() {
     const documentList = document.getElementById('documentList');
     documentList.innerHTML = 'Loading...';  // Initial loading message
+
     try {
         const response = await fetch('http://localhost:8081/document');  // Call Document API
         if (!response.ok) {
@@ -26,35 +29,50 @@ async function fetchDocuments() {
         documentList.innerHTML = '';  // Clear loading message
 
         if (documents.length === 0) {
-            documentList.innerHTML = '<li>No documents found.</li>';
+            documentList.innerHTML = 'No documents found!';
         } else {
             documents.forEach(doc => {
-                const listItem = document.createElement('li');
+                const card = document.createElement('div');
+                card.className = 'card mb-3'; // Bootstrap card class
 
-                // Format the created and updated dates for CET in European format
-                const createdAt = new Date(doc.createdAt).toLocaleString('en-GB', {
-                    timeZone: 'CET',
-                    hour12: false,  // 24-hour clock
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
+                // Card body
+                card.innerHTML = `
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- First Column for Title and Content -->
+                            <div class="col-md-8">
+                                <h5 class="card-title">${doc.title}</h5>
+                                <p class="card-text">${doc.content}</p>
+                            </div>
 
-                const updatedAt = new Date(doc.updatedAt).toLocaleString('en-GB', {
-                    timeZone: 'CET',
-                    hour12: false,  // 24-hour clock
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-
-                // Set the list item text
-                listItem.textContent = `${doc.title} (ID: ${doc.id}) - Created At: ${createdAt} - Updated At: ${updatedAt}`;
-                documentList.appendChild(listItem);
+                            <!-- Second Column for ID, Created, Last Updated, and Delete Button -->
+                            <div class="col-md-4 border-left">
+                                <div class="row">
+                                    <div class="col text-right">
+                                        <small class="text-muted">ID: ${doc.id}</small>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col text-right">
+                                        <small class="text-muted">Created at: ${formatDate(doc.createdAt)}</small>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col text-right">
+                                        <small class="text-muted">Last updated at: ${formatDate(doc.updatedAt)}</small>
+                                    </div>
+                                </div>
+                                <div class="row mt-auto">
+                                    <div class="col text-right margin-top">
+                                        <!-- Delete Button -->
+                                        <button class="btn btn-danger text-uppercase" onclick="deleteDocument(${doc.id})">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                documentList.appendChild(card);
             });
         }
     } catch (error) {
@@ -63,18 +81,25 @@ async function fetchDocuments() {
     }
 }
 
+// Helper function to format the date
+function formatDate(dateString) {
+    return new Date(dateString).toLocaleString('en-GB', {
+        timeZone: 'CET',
+        hour12: false,
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
 
 
 async function addDocument() {
     const title = document.getElementById('docTitle').value;
     const content = document.getElementById('docContent').value;
 
-    console.log("Adding Document:", { title, content }); // Add this line to log input
-
-    if (!title || !content) {
-        alert('Please fill in all fields.');
-        return;
-    }
+    console.log("Adding Document:", { title, content });
 
     try {
         const response = await fetch('http://localhost:8081/document', {
@@ -86,7 +111,16 @@ async function addDocument() {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to add document: ' + response.statusText);
+            const errorData = await response.json();
+
+            // Extract the validation messages from the error response
+            const validationMessages = errorData.errors
+                ? Object.values(errorData.errors).flat()  // Keep as an array for bulleted list
+                : ['Failed to add document: ' + response.statusText];  // Convert to array
+
+            // Display the validation errors using Bootstrap alert
+            showAlert(validationMessages, 'danger');
+            return;
         }
 
         // Clear input fields
@@ -95,20 +129,16 @@ async function addDocument() {
 
         // Refresh the document list
         await fetchDocuments();
+
+        // Show success message
+        showAlert('Document added successfully!', 'success');
     } catch (error) {
         console.error('Error adding document:', error);
-        alert('Error adding document: ' + error.message);
+        showAlert('Error adding document: ' + error.message, 'danger');
     }
 }
 
-
-async function deleteDocument() {
-    const id = document.getElementById('docId').value;
-
-    if (!id) {
-        alert('Please enter a document ID.');
-        return;
-    }
+async function deleteDocument(id) {
 
     try {
         const response = await fetch(`http://localhost:8081/document/${id}`, {
@@ -116,18 +146,56 @@ async function deleteDocument() {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to delete document: ' + response.statusText);
+            if (response.status === 404) {
+                showAlert(`Document with ID ${id} not found.`, 'danger');
+            } else {
+                const errorResponse = await response.text();
+                showAlert('Failed to delete document: ' + errorResponse, 'danger');
+            }
+            return;
         }
-
-        // Clear the input field
-        document.getElementById('docId').value = '';
 
         // Refresh the document list
         await fetchDocuments();
+
+        // Show success message
+        showAlert('Document deleted successfully!', 'success'); 
     } catch (error) {
         console.error('Error deleting document:', error);
-        alert('Error deleting document: ' + error.message);
+        showAlert('Error deleting document: ' + error.message, 'danger');
     }
+}
+
+// Function to display Bootstrap alerts
+function showAlert(messages, type) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.role = 'alert';
+
+    // Check if messages is an array or a single message
+    if (Array.isArray(messages)) {
+        const ul = document.createElement('ul');
+        messages.forEach(message => {
+            const li = document.createElement('li');
+            li.textContent = message;  // Create a list item for each message
+            ul.appendChild(li);
+        });
+        alertDiv.appendChild(ul);  // Append the list to the alert
+    } else {
+        alertDiv.textContent = messages;  // If it's a single message, just set the text
+    }
+
+    alertDiv.innerHTML +=
+        '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+        '<span aria-hidden="true">&times;</span></button>';
+
+    alertContainer.appendChild(alertDiv);
+
+
+    setTimeout(() => {
+        $(alertDiv).alert('close');  // jQuery to close the alert after 5 seconds
+    }, 5000);
 }
 
 // Fetch the messages and documents when the page loads
