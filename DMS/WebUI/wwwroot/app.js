@@ -261,5 +261,4 @@ window.onload = async () => {
 
     // Attach event listeners to buttons
     document.getElementById('addDocumentButton').addEventListener('click', addDocument);
-    document.getElementById('deleteDocumentButton').addEventListener('click', deleteDocument);
 };

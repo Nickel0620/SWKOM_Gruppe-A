@@ -4,7 +4,6 @@ using DAL.Repositories;
 using AutoMapper;
 using REST_API.DTOs;
 
-
 namespace REST_API.Controllers
 {
     [ApiController]
@@ -14,12 +13,17 @@ namespace REST_API.Controllers
         private readonly IDocumentRepository _documentRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<DocumentController> _logger;
+        private readonly RabbitMQPublisher _rabbitMQPublisher;
 
-        public DocumentController(IDocumentRepository documentRepository, IMapper mapper, ILogger<DocumentController> logger)
+        private const string DocumentEventTemplate = "Document {EventType}: {DocumentId}";
+        private const string DocumentErrorTemplate = "Error occurred while {Action} document {DocumentId}";
+
+        public DocumentController(IDocumentRepository documentRepository, IMapper mapper, ILogger<DocumentController> logger, RabbitMQPublisher rabbitMQPublisher)
         {
             _documentRepository = documentRepository;
             _mapper = mapper;
             _logger = logger;
+            _rabbitMQPublisher = rabbitMQPublisher;
         }
 
         // GET: /document
@@ -49,67 +53,105 @@ namespace REST_API.Controllers
         [HttpPost(Name = "CreateDocument")]
         public async Task<ActionResult<DocumentDTO>> Post([FromBody] DocumentDTO documentDTO)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState); // Return validation errors
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState); // Return validation errors
+                }
+
+                var document = _mapper.Map<Document>(documentDTO);
+                document.CreatedAt = DateTime.UtcNow;
+                document.UpdatedAt = DateTime.UtcNow;
+
+                await _documentRepository.AddDocumentAsync(document);
+                var createdDocumentDTO = _mapper.Map<DocumentDTO>(document); // Map the created Document back to DocumentDTO
+
+                // publish message to RabbitMQ
+                _rabbitMQPublisher.PublishDocumentCreated(createdDocumentDTO);
+                _logger.LogInformation(DocumentEventTemplate, "created", document.Id);
+
+                return CreatedAtAction(nameof(GetById), new { id = document.Id }, createdDocumentDTO);
             }
-
-            var document = _mapper.Map<Document>(documentDTO);
-            document.CreatedAt = DateTime.UtcNow;
-            document.UpdatedAt = DateTime.UtcNow;
-
-            await _documentRepository.AddDocumentAsync(document);
-            var createdDocumentDTO = _mapper.Map<DocumentDTO>(document); // Map the created Document back to DocumentDTO
-
-            return CreatedAtAction(nameof(GetById), new { id = document.Id }, createdDocumentDTO);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, DocumentErrorTemplate, "creating", documentDTO.Id);
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
 
         // DELETE: /document/{id}
         [HttpDelete("{id}", Name = "DeleteDocument")]
         public async Task<IActionResult> Delete(int id)
         {
-            if (id <= 0) // Simple validation
+            try
             {
-                return BadRequest("Invalid document ID.");
-            }
+                if (id <= 0) // Simple validation
+                {
+                    return BadRequest("Invalid document ID.");
+                }
 
-            var document = await _documentRepository.GetDocumentByIdAsync(id);
-            if (document == null)
+                var document = await _documentRepository.GetDocumentByIdAsync(id);
+                if (document == null)
+                {
+                    return NotFound(); // Return 404
+                }
+
+                await _documentRepository.DeleteDocumentAsync(id);
+
+                // publish message to RabbitMQ
+                _rabbitMQPublisher.PublishDocumentDeleted(id);
+                _logger.LogInformation(DocumentEventTemplate, "deleted", id);
+
+                return NoContent();
+            }
+            catch (Exception ex)
             {
-                return NotFound(); // Return 404
+                _logger.LogError(ex, DocumentErrorTemplate, "deleting", id);
+                return StatusCode(500, new { error = ex.Message });
             }
-
-            await _documentRepository.DeleteDocumentAsync(id);
-            return NoContent();
         }
 
         // PUT: /document/{id}
         [HttpPut("{id}", Name = "UpdateDocument")]
         public async Task<IActionResult> Put(int id, [FromBody] DocumentDTO documentDTO)
         {
-            if (id <= 0) // Simple validation
+            try
             {
-                return BadRequest("Invalid document ID.");
-            }
+                if (id <= 0) // Simple validation
+                {
+                    return BadRequest("Invalid document ID.");
+                }
 
-            if (!ModelState.IsValid)
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState); // Return validation errors
+                }
+
+                var existingDocument = await _documentRepository.GetDocumentByIdAsync(id);
+                if (existingDocument == null)
+                {
+                    return NotFound(); // Return 404 if document does not exist
+                }
+
+                // Map updated properties
+                existingDocument.Title = documentDTO.Title;
+                existingDocument.Content = documentDTO.Content;
+                existingDocument.UpdatedAt = DateTime.UtcNow; // Update the last modified date
+
+                await _documentRepository.UpdateDocumentAsync(existingDocument);
+
+                // publish message to RabbitMQ
+                _rabbitMQPublisher.PublishDocumentUpdated(_mapper.Map<DocumentDTO>(existingDocument));
+                _logger.LogInformation(DocumentEventTemplate, "updated", id);
+
+                return NoContent(); // Return 204 No Content on successful update
+            }
+            catch (Exception ex)
             {
-                return BadRequest(ModelState); // Return validation errors
+                _logger.LogError(ex, DocumentErrorTemplate, "updating", id);
+                return StatusCode(500, new { error = ex.Message });
             }
-
-            var existingDocument = await _documentRepository.GetDocumentByIdAsync(id);
-            if (existingDocument == null)
-            {
-                return NotFound(); // Return 404 if document does not exist
-            }
-
-            // Map updated properties
-            existingDocument.Title = documentDTO.Title;
-            existingDocument.Content = documentDTO.Content;
-            existingDocument.UpdatedAt = DateTime.UtcNow; // Update the last modified date
-
-            await _documentRepository.UpdateDocumentAsync(existingDocument);
-            return NoContent(); // Return 204 No Content on successful update
         }
     }
 }

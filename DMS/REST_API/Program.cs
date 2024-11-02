@@ -6,7 +6,6 @@ using REST_API.MappingProfiles;
 using REST_API.DTOs;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using REST_API.Services;  // Add reference for RabbitMQPublisher
 
 var builder = WebApplication.CreateBuilder(args);
 
