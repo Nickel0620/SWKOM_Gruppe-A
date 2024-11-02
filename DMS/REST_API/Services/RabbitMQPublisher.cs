@@ -11,8 +11,8 @@ public class RabbitMQPublisher
     private const string ExchangeName = "document_events"; // name for our message exchange
 
     // Log message templates
-    private const string DocumentEventTemplate = "Document event {EventType} published for document {DocumentId}";
-    private const string DocumentEventErrorTemplate = "Failed to publish {EventType} event for document {DocumentId}";
+    private const string DocumentEventTemplate = "Document event {EventType} published for document {Id}";
+    private const string DocumentEventErrorTemplate = "Failed to publish {EventType} event for document {Id}";
 
     public RabbitMQPublisher(ILogger<RabbitMQPublisher> logger)
     {
