@@ -6,6 +6,7 @@ using REST_API.MappingProfiles;
 using REST_API.DTOs;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using REST_API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +42,8 @@ builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 
 // Register RabbitMQPublisher as a singleton
 builder.Services.AddSingleton<RabbitMQPublisher>();
+
+builder.Services.AddHostedService<OcrWorker>();
 
 // Add controllers
 builder.Services.AddControllers();

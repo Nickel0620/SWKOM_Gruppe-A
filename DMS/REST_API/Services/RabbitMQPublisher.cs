@@ -53,6 +53,18 @@ public class RabbitMQPublisher
         }
     }
 
+    public IConnection GetConnection()
+    {
+        if (_connection.IsOpen)
+        {
+            return _connection;
+        }
+        else
+        {
+            throw new InvalidOperationException("RabbitMQ connection is closed.");
+        }
+    }
+
     public void PublishDocumentCreated(DocumentDTO document)
     {
         try

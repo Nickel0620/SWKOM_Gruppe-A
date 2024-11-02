@@ -12,6 +12,7 @@ services:
     depends_on:
       - dms-db
       - rabbitmq  # Add RabbitMQ dependency
+    restart: unless-stopped
 
   dms-db:
     image: postgres:latest
