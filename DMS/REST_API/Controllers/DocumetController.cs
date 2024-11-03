@@ -3,6 +3,7 @@ using DAL.Entities;
 using DAL.Repositories;
 using AutoMapper;
 using REST_API.DTOs;
+using REST_API.Services;
 
 namespace REST_API.Controllers
 {

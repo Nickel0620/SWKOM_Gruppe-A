@@ -43,7 +43,7 @@ builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 // Register RabbitMQPublisher as a singleton
 builder.Services.AddSingleton<RabbitMQPublisher>();
 
-builder.Services.AddHostedService<OcrWorker>();
+//builder.Services.AddHostedService<OcrWorker>();
 
 // Add controllers
 builder.Services.AddControllers();
@@ -65,7 +65,10 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "V1");
+    });
 }
 
 app.UseHttpsRedirection();

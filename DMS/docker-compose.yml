@@ -11,7 +11,7 @@ services:
       - ASPNETCORE_URLS=http://+:8080/
     depends_on:
       - dms-db
-      - rabbitmq  # Add RabbitMQ dependency
+      - rabbitmq
     restart: unless-stopped
 
   dms-db:
