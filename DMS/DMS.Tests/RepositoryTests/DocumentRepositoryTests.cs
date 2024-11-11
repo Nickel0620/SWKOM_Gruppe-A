@@ -2,6 +2,9 @@
 using DAL.Entities;
 using DAL.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
+using REST_API.Controllers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
@@ -12,6 +15,7 @@ namespace DMS.Tests.RepositoryTests
     {
         private readonly DocumentContext _context;
         private readonly DocumentRepository _repository;
+        private readonly Mock<ILogger<DocumentRepository>> _mockLogger;
 
         public DocumentRepositoryTests()
         {
@@ -19,8 +23,9 @@ namespace DMS.Tests.RepositoryTests
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) // Unique database name for each test
                 .Options;
 
+            _mockLogger = new Mock<ILogger<DocumentRepository>>();
             _context = new DocumentContext(options);
-            _repository = new DocumentRepository(_context);
+            _repository = new DocumentRepository(_context, _mockLogger.Object);
         }
 
         [Fact]

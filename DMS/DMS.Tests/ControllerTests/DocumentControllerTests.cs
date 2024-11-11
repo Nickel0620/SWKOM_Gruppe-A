@@ -7,6 +7,7 @@ using AutoMapper;
 using REST_API.Controllers;
 using REST_API.DTOs;
 using Microsoft.Extensions.Logging;
+using REST_API.Services;
 
 namespace DMS.Tests.ControllerTests
 {
@@ -16,13 +17,14 @@ namespace DMS.Tests.ControllerTests
         private readonly Mock<IDocumentRepository> _mockRepository;
         private readonly Mock<IMapper> _mockMapper;
         private readonly Mock<ILogger<DocumentController>> _mockLogger;
+        private readonly Mock<RabbitMQPublisher> _rabbitMQPublisher;
 
         public DocumentControllerTests()
         {
             _mockRepository = new Mock<IDocumentRepository>();
             _mockMapper = new Mock<IMapper>();
             _mockLogger = new Mock<ILogger<DocumentController>>();
-            _controller = new DocumentController(_mockRepository.Object, _mockMapper.Object, _mockLogger.Object);
+            _controller = new DocumentController(_mockRepository.Object, _mockMapper.Object, _mockLogger.Object, _rabbitMQPublisher.Object);
         }
 
         #region GET Tests
