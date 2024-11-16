@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebUI", "WebUI\WebUI.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAL", "DAL\DAL.csproj", "{50A2E03E-77B6-4114-83B8-12AD306FF2A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DMS.Tests", "DMS.Tests\DMS.Tests.csproj", "{D936E730-78EE-4F5D-BF5C-24AC2CD9E3B3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DMS.Tests", "DMS.Tests\DMS.Tests.csproj", "{D936E730-78EE-4F5D-BF5C-24AC2CD9E3B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OcrWorker", "OcrWorker\OcrWorker.csproj", "{EE5D860E-D7B0-41FA-831F-3FE4BE9F06C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{D936E730-78EE-4F5D-BF5C-24AC2CD9E3B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D936E730-78EE-4F5D-BF5C-24AC2CD9E3B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D936E730-78EE-4F5D-BF5C-24AC2CD9E3B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE5D860E-D7B0-41FA-831F-3FE4BE9F06C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE5D860E-D7B0-41FA-831F-3FE4BE9F06C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE5D860E-D7B0-41FA-831F-3FE4BE9F06C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE5D860E-D7B0-41FA-831F-3FE4BE9F06C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

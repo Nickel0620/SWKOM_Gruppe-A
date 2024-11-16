@@ -1,32 +1,17 @@
-﻿// test for the REST API
-async function fetchHelloWorld() {
-    const messageElement = document.getElementById('message');
-    messageElement.textContent = 'Loading...';  // Initial loading message
-    try {
-        const response = await fetch('/api/HelloWorld');
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        const message = await response.text();
-        messageElement.textContent = message;  // Display the message from API
-    } catch (error) {
-        console.error('Error fetching message:', error);
-        messageElement.textContent = 'Failed to fetch message: ' + error.message;
-    }
-}
+﻿const apiUrl = 'http://localhost:8080';
 
 // Fetch the documents from the API and display them in a list
 async function fetchDocuments() {
     const documentList = document.getElementById('documentList');
-    documentList.innerHTML = 'Loading...';  // Initial loading message
+    documentList.innerHTML = 'Loading...'; // Initial loading message
 
     try {
-        const response = await fetch('http://localhost:8081/document');  // Call Document API
+        const response = await fetch(`${apiUrl}/document`); // Call Document API
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         const documents = await response.json();
-        documentList.innerHTML = '';  // Clear loading message
+        documentList.innerHTML = ''; // Clear loading message
 
         if (documents.length === 0) {
             documentList.innerHTML = 'No documents found!';
@@ -39,13 +24,15 @@ async function fetchDocuments() {
                 card.innerHTML = `
                     <div class="card-body">
                         <div class="row">
-                            <!-- First Column for Title and Content -->
+                            <!-- First Column for Title, Content, and OCR Text -->
                             <div class="col-md-8">
                                 <h5 class="card-title">${doc.title}</h5>
-                                <p class="card-text">${doc.content}</p>
+                                ${doc.ocrText
+                        ? `<p class="card-text"><strong>OCR Text:</strong> ${doc.ocrText}</p>`
+                        : '<p class="card-text text-muted">OCR Text: Not available</p>'}
                             </div>
 
-                            <!-- Second Column for ID, Created, Last Updated, and Buttons -->
+                            <!-- Second Column for Metadata and Buttons -->
                             <div class="col-md-4 border-left">
                                 <div class="row">
                                     <div class="col text-right">
@@ -59,13 +46,15 @@ async function fetchDocuments() {
                                 </div>
                                 <div class="row">
                                     <div class="col text-right">
-                                        <small class="text-muted">Last updated at: ${formatDate(doc.updatedAt)}</small>
+                                        <small class="text-muted">
+                                            Last updated at: ${doc.updatedAt ? formatDate(doc.updatedAt) : '-'}
+                                        </small>
                                     </div>
                                 </div>
                                 <div class="row mt-auto">
                                     <div class="col text-right margin-top">
                                         <!-- Edit Button -->
-                                        <button class="btn btn-info text-uppercase" onclick="openEditModal(${doc.id}, '${doc.title}', '${doc.content}')">Edit</button>
+                                        <!-- <button class="btn btn-info text-uppercase" onclick="openEditModal(${doc.id}, '${doc.title}', '${doc.content}')">Edit</button> -->
                                         <!-- Delete Button -->
                                         <button class="btn btn-danger text-uppercase" onclick="deleteDocument(${doc.id})">Delete</button>
                                     </div>
@@ -73,7 +62,7 @@ async function fetchDocuments() {
                             </div>
                         </div>
                     </div>
-`;
+                `;
                 documentList.appendChild(card);
             });
         }
@@ -96,54 +85,83 @@ function formatDate(dateString) {
     });
 }
 
-
 async function addDocument() {
-    const title = document.getElementById('docTitle').value;
-    const content = document.getElementById('docContent').value;
+    const titleInput = document.getElementById('docTitle');
+    const fileInput = document.getElementById('docFile');
 
-    console.log("Adding Document:", { title, content });
+    // Validate title input
+    if (!titleInput || titleInput.value.trim() === '') {
+        showAlert('Document Title is required.', 'danger');
+        return;
+    }
+
+    // Validate file input
+    if (!fileInput || !fileInput.files[0]) {
+        showAlert('Please select a file to upload.', 'danger');
+        return;
+    }
+
+    const title = titleInput.value.trim();
+    const file = fileInput.files[0];
 
     try {
-        const response = await fetch('http://localhost:8081/document', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ title, content })
-        });
+        // Step 1: Create the document
+        const createdDocument = await createDocument(title);
+        const documentId = createdDocument.id;
 
-        if (!response.ok) {
-            const errorData = await response.json();
+        // Step 2: Upload the file for the created document
+        await uploadFile(documentId, file);
 
-            // Extract the validation messages from the error response
-            const validationMessages = errorData.errors
-                ? Object.values(errorData.errors).flat()  // Keep as an array for bulleted list
-                : ['Failed to add document: ' + response.statusText];  // Convert to array
-
-            // Display the validation errors using Bootstrap alert
-            showAlert(validationMessages, 'danger');
-            return;
-        }
-
-        // Clear input fields
-        document.getElementById('docTitle').value = '';
-        document.getElementById('docContent').value = '';
-
-        // Refresh the document list
+        titleInput.value = '';
+        fileInput.value = '';
         await fetchDocuments();
-
-        // Show success message
         showAlert('Document added successfully!', 'success');
     } catch (error) {
-        console.error('Error adding document:', error);
-        showAlert('Error adding document: ' + error.message, 'danger');
+        showAlert(`Error adding document: ${error.message}`, 'danger');
+    }
+}
+
+async function createDocument(title) {
+    const documentDto = { title };
+
+    const response = await fetch(`${apiUrl}/document`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(documentDto),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error creating document:', errorData);
+        throw new Error(errorData.message || 'Failed to create document');
+    }
+
+    const createdDocument = await response.json();
+    console.log('Created Document:', createdDocument); // Debug log
+    return createdDocument;
+}
+
+async function uploadFile(documentId, file) {
+    const formData = new FormData();
+    formData.append('documentFile', file);
+
+    const response = await fetch(`${apiUrl}/document/${documentId}/upload`, {
+        method: 'PUT',
+        body: formData,
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error uploading file:', errorData);
+        throw new Error(errorData.message || 'Failed to upload file');
     }
 }
 
 async function deleteDocument(id) {
-
     try {
-        const response = await fetch(`http://localhost:8081/document/${id}`, {
+        const response = await fetch(`${apiUrl}/document/${id}`, {
             method: 'DELETE'
         });
 
@@ -157,108 +175,84 @@ async function deleteDocument(id) {
             return;
         }
 
-        // Refresh the document list
         await fetchDocuments();
-
-        // Show success message
-        showAlert('Document deleted successfully!', 'success'); 
+        showAlert('Document deleted successfully!', 'success');
     } catch (error) {
         console.error('Error deleting document:', error);
         showAlert('Error deleting document: ' + error.message, 'danger');
     }
 }
 
-// Function to open the edit modal and populate the fields
-function openEditModal(id, title, content) {
-    // Set the values in the modal
-    document.getElementById('editDocTitle').value = title;
-    document.getElementById('editDocContent').value = content;
+//function openEditModal(id, title, content) {
+//    document.getElementById('editDocTitle').value = title;
+//    document.getElementById('editDocContent').value = content;
+//    window.currentEditDocumentId = id;
+//    $('#editDocumentModal').modal('show');
+//}
 
-    // Store the document ID to be edited in a global variable
-    window.currentEditDocumentId = id;
+//document.getElementById('saveChangesButton').addEventListener('click', async () => {
+//    const title = document.getElementById('editDocTitle').value;
+//    const content = document.getElementById('editDocContent').value;
 
-    // Show the modal
-    $('#editDocumentModal').modal('show');
-}
+//    try {
+//        const response = await fetch(`http://localhost:8080/document/${window.currentEditDocumentId}`, {
+//            method: 'PUT',
+//            headers: {
+//                'Content-Type': 'application/json'
+//            },
+//            body: JSON.stringify({ title, content })
+//        });
 
-// Save changes when the Save button is clicked
-document.getElementById('saveChangesButton').addEventListener('click', async () => {
-    const title = document.getElementById('editDocTitle').value;
-    const content = document.getElementById('editDocContent').value;
+//        if (!response.ok) {
+//            const errorData = await response.json();
+//            const validationMessages = errorData.errors
+//                ? Object.values(errorData.errors).flat()
+//                : [`Failed to update document: ${response.statusText}`];
+//            showAlert(validationMessages, 'danger');
+//            return;
+//        }
 
-    console.log("Updating Document:", { id: window.currentEditDocumentId, title, content });
+//        await fetchDocuments();
+//        $('#editDocumentModal').modal('hide');
+//        showAlert('Document updated successfully!', 'success');
+//    } catch (error) {
+//        console.error('Error updating document:', error);
+//        showAlert('Error updating document: ' + error.message, 'danger');
+//    }
+//});
 
-    try {
-        const response = await fetch(`http://localhost:8081/document/${window.currentEditDocumentId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ title, content })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            const validationMessages = errorData.errors
-                ? Object.values(errorData.errors).flat()
-                : ['Failed to update document: ' + response.statusText];
-
-            // Display the validation errors using Bootstrap alert
-            showAlert(validationMessages, 'danger');
-            return;
-        }
-
-        // Refresh the document list
-        await fetchDocuments();
-
-        // Close the modal
-        $('#editDocumentModal').modal('hide');
-
-        // Show success message
-        showAlert('Document updated successfully!', 'success');
-    } catch (error) {
-        console.error('Error updating document:', error);
-        showAlert('Error updating document: ' + error.message, 'danger');
-    }
-});
-
-// Function to display Bootstrap alerts
 function showAlert(messages, type) {
     const alertContainer = document.getElementById('alertContainer');
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
     alertDiv.role = 'alert';
 
-    // Check if messages is an array or a single message
     if (Array.isArray(messages)) {
         const ul = document.createElement('ul');
         messages.forEach(message => {
             const li = document.createElement('li');
-            li.textContent = message;  // Create a list item for each message
+            li.textContent = message;
             ul.appendChild(li);
         });
-        alertDiv.appendChild(ul);  // Append the list to the alert
+        alertDiv.appendChild(ul);
     } else {
-        alertDiv.textContent = messages;  // If it's a single message, just set the text
+        alertDiv.textContent = messages;
     }
 
-    alertDiv.innerHTML +=
-        '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
-        '<span aria-hidden="true">&times;</span></button>';
+    alertDiv.innerHTML += `
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    `;
 
     alertContainer.appendChild(alertDiv);
 
-
     setTimeout(() => {
-        $(alertDiv).alert('close');  // jQuery to close the alert after 5 seconds
+        $(alertDiv).alert('close');
     }, 5000);
 }
 
-// Fetch the messages and documents when the page loads
 window.onload = async () => {
-    await fetchHelloWorld();
     await fetchDocuments();
-
-    // Attach event listeners to buttons
     document.getElementById('addDocumentButton').addEventListener('click', addDocument);
 };

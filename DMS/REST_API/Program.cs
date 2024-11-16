@@ -40,13 +40,20 @@ builder.Services.AddDbContext<DocumentContext>(options =>
 // Register the repository from DAL
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 
-// Register RabbitMQPublisher as a singleton
-builder.Services.AddSingleton<RabbitMQPublisher>();
 
-//builder.Services.AddHostedService<OcrWorker>();
+
+builder.Services.AddHttpClient("DAL", client =>
+{
+    client.BaseAddress = new Uri("http://dal:8081");
+});
+
+
 
 // Add controllers
 builder.Services.AddControllers();
+
+builder.Services.AddSingleton<IMessageQueueService, MessageQueueService>();
+builder.Services.AddHostedService<RabbitMqListenerService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -71,10 +78,12 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 // Enable CORS
 app.UseCors("AllowAllOrigins");
+
+app.Urls.Add("http://*:8080");
 
 app.UseAuthorization();
 

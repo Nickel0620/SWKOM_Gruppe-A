@@ -27,36 +27,30 @@
         <!-- Page Title -->
         <h1 class="text-center">Document Management System</h1>
 
-        <!-- Message Display Section -->
-        <div class="text-center mb-4 small">
-            <span>Test message from REST_API:</span>
-            <span id="message" class="ml-2 font-weight-bold"></span>
-        </div>
-
         <!-- Documents List Section -->
         <h2 class="f-m mt-4">Documents</h2>
         <div id="documentList" class="list-group mb-4 bg-simple"></div>
 
         <!-- Add and Delete Document Sections in Two Columns -->
-        <div class="row mb-4">
-            <!-- Add Document Column -->
-            <div class="col-md-6">
-                <h3 class="f-m">Add Document</h3>
+        <div class="">
+            <h3 class="f-m">Add Document</h3>
 
-                <div class="bg-simple">
-                    <div class="form-group">
-                        <input type="text" id="docTitle" class="form-control" placeholder="Document Title" required />
-                    </div>
-                    <div class="form-group">
-                        <textarea id="docContent" class="form-control" placeholder="Document Content" required></textarea>
-                    </div>
-                    <button id="addDocumentButton" class="btn btn-primary text-uppercase">Add</button>
+            <div class="bg-simple">
+                <div class="form-group">
+                    <input type="text" id="docTitle" class="form-control" placeholder="Document Title" required />
                 </div>
+                <!--<div class="form-group">
+                    <textarea id="docContent" class="form-control" placeholder="Document Content" required></textarea>
+                </div>-->
+                <div class="form-group">
+                    <input type="file" id="docFile" class="form-control-file" required />
+                </div>
+                <button id="addDocumentButton" class="btn btn-primary text-uppercase">Add</button>
             </div>
         </div>
 
         <!-- Alert Container -->
-        <div id="alertContainer" class="mb-4"></div>
+        <div id="alertContainer" class="mb-4 mt-4"></div>
 
     </div>
 

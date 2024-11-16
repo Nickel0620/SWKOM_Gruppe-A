@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using DAL.Entities;
+﻿using DAL.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Context
 {
@@ -7,19 +7,30 @@ namespace DAL.Context
     {
         public DocumentContext(DbContextOptions<DocumentContext> options) : base(options) { }
 
+        // Parameterless constructor for design-time tools
+        public DocumentContext() : base(new DbContextOptionsBuilder<DocumentContext>().UseNpgsql("Host=localhost;Database=dmsdb;Username=dmsuser;Password=dmspassword").Options)
+        {
+        }
+
         public DbSet<Document> Documents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
+            // Configure the Document entity
+            modelBuilder.Entity<Document>()
+                .Property(d => d.Id)
+                .ValueGeneratedOnAdd(); // Ensure auto-generation
+
             modelBuilder.Entity<Document>()
                 .Property(d => d.CreatedAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .ValueGeneratedOnAdd();
+                .HasDefaultValueSql("CURRENT_TIMESTAMP"); // Default CreatedAt
 
             modelBuilder.Entity<Document>()
                 .Property(d => d.UpdatedAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .ValueGeneratedOnAdd();
+                .HasDefaultValueSql("CURRENT_TIMESTAMP") // Default UpdatedAt
+                .ValueGeneratedOnUpdate(); // Automatically update on modifications
         }
     }
 }

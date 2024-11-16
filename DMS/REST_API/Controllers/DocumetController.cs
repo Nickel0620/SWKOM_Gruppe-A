@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using DAL.Entities;
-using DAL.Repositories;
-using AutoMapper;
 using REST_API.DTOs;
+using AutoMapper;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using DAL.Entities;
 using REST_API.Services;
+using System.Text.Json;
 
 namespace REST_API.Controllers
 {
@@ -11,192 +14,190 @@ namespace REST_API.Controllers
     [Route("[controller]")]
     public class DocumentController : ControllerBase
     {
-        private readonly IDocumentRepository _documentRepository;
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly IMapper _mapper;
-        private readonly ILogger<DocumentController> _logger;
-        private readonly RabbitMQPublisher _rabbitMQPublisher;
+        private readonly IMessageQueueService _messageQueueService;
 
-        private const string DocumentEventTemplate = "Document {EventType}: {Id}";
-        private const string DocumentErrorTemplate = "Error occurred while {Action} document {Id}";
-        private const string DocumentActionTemplate = "Attempting to {Action} document {Id}";
-        private const string ValidationErrorTemplate = "Validation failed for {Action} document: {Errors}";
-
-        public DocumentController(IDocumentRepository documentRepository, IMapper mapper, ILogger<DocumentController> logger, RabbitMQPublisher rabbitMQPublisher)
+        public DocumentController(IHttpClientFactory httpClientFactory, IMapper mapper, IMessageQueueService messageQueueService)
         {
-            _documentRepository = documentRepository;
+            _httpClientFactory = httpClientFactory;
             _mapper = mapper;
-            _logger = logger;
-            _rabbitMQPublisher = rabbitMQPublisher;
+            _messageQueueService = messageQueueService;
         }
 
-        // GET: /document
-        [HttpGet(Name = "GetDocuments")]
-        public async Task<ActionResult<IEnumerable<Document>>> Get()
+        private IActionResult CreateErrorResponse(string message, int statusCode)
         {
-            try
-            {
-                _logger.LogInformation("Fetching all documents");
-                var documents = await _documentRepository.GetAllDocumentsAsync();
-                _logger.LogInformation("Retrieved {Count} documents", documents?.Count() ?? 0);
-                
-                var documentDTOs = _mapper.Map<IEnumerable<DocumentDTO>>(documents);
-                return Ok(documentDTOs);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to fetch documents");
-                return StatusCode(500, new { error = "Failed to retrieve documents" });
-            }
+            return StatusCode(statusCode, new { error = message });
         }
 
-        // GET: /document/{id}
-        [HttpGet("{id}", Name = "GetDocumentById")]
-        public async Task<ActionResult<Document>> GetById(int id)
+        [HttpGet]
+        public async Task<IActionResult> Get()
         {
-            _logger.LogInformation(DocumentActionTemplate, "get", id);
+            var client = _httpClientFactory.CreateClient("DAL");
+            var response = await client.GetAsync("/api/document");
 
-            var document = await _documentRepository.GetDocumentByIdAsync(id);
-            if (document == null)
+            if (response.IsSuccessStatusCode)
             {
-                _logger.LogWarning("Document {Id} not found", id);
-                return NotFound();
+                var documents = await response.Content.ReadFromJsonAsync<IEnumerable<Document>>();
+                var sortedDocuments = documents.OrderBy(d => d.Id);
+                var dtoDocuments = _mapper.Map<IEnumerable<DocumentDTO>>(sortedDocuments);
+                return Ok(dtoDocuments);
             }
 
-            _logger.LogInformation("Document retrieved successfully: {Id}", id);
-            var documentDTO = _mapper.Map<DocumentDTO>(document);
-            return Ok(documentDTO);
+            return CreateErrorResponse("Error retrieving documents from DAL", (int)response.StatusCode);
         }
 
-        // POST: /document
-        [HttpPost(Name = "CreateDocument")]
-        public async Task<ActionResult<DocumentDTO>> Post([FromBody] DocumentDTO documentDTO)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            try
-            {
-                _logger.LogInformation("Attempting to create new document");
+            var client = _httpClientFactory.CreateClient("DAL");
+            var response = await client.GetAsync($"/api/document/{id}");
 
-                if (!ModelState.IsValid)
+            if (response.IsSuccessStatusCode)
+            {
+                var document = await response.Content.ReadFromJsonAsync<Document>();
+                if (document != null)
                 {
-                    var errors = string.Join("; ", ModelState.Values
-                        .SelectMany(v => v.Errors)
-                        .Select(e => e.ErrorMessage));
-                    _logger.LogWarning(ValidationErrorTemplate, "create", errors);
-                    return BadRequest(ModelState);
+                    var dtoDocument = _mapper.Map<DocumentDTO>(document);
+                    return Ok(dtoDocument);
                 }
 
-                var document = _mapper.Map<Document>(documentDTO);
-                document.CreatedAt = DateTime.UtcNow;
-                document.UpdatedAt = DateTime.UtcNow;
-
-                _logger.LogDebug("Saving document to database");
-                await _documentRepository.AddDocumentAsync(document);
-
-                var createdDocumentDTO = _mapper.Map<DocumentDTO>(document); // Map the created Document back to DocumentDTO
-                _logger.LogInformation("Document created successfully with ID: {Id}", document.Id);
-
-                // publish message to RabbitMQ
-                _logger.LogDebug("Publishing document created event to RabbitMQ");
-                _rabbitMQPublisher.PublishDocumentCreated(createdDocumentDTO);
-                _logger.LogInformation(DocumentEventTemplate, "created", document.Id);
-
-                return CreatedAtAction(nameof(GetById), new { id = document.Id }, createdDocumentDTO);
+                return NotFound(new { error = "Document not found" });
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, DocumentErrorTemplate, "creating", documentDTO.Id);
-                return StatusCode(500, new { error = ex.Message });
-            }
+
+            return CreateErrorResponse("Error retrieving document from DAL", (int)response.StatusCode);
         }
 
-        // DELETE: /document/{id}
-        [HttpDelete("{id}", Name = "DeleteDocument")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpPost]
+        [HttpPost]
+        public async Task<IActionResult> Create(DocumentDTO documentDto)
         {
-            try
+            Console.WriteLine($"Received DocumentDTO: {JsonSerializer.Serialize(documentDto)}");
+
+            if (!ModelState.IsValid)
             {
-                _logger.LogInformation(DocumentActionTemplate, "delete", id);
+                return BadRequest(new { errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage)) });
+            }
 
-                if (id <= 0) // Simple validation
+            var client = _httpClientFactory.CreateClient("DAL");
+            var document = _mapper.Map<Document>(documentDto);
+
+            var response = await client.PostAsJsonAsync("/api/document", document);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Parse the created document from the DAL response
+                var createdDocument = await response.Content.ReadFromJsonAsync<Document>();
+
+                if (createdDocument == null || createdDocument.Id <= 0)
                 {
-                    _logger.LogWarning("Invalid document ID provided for deletion: {Id}", id);
-                    return BadRequest("Invalid document ID.");
+                    return StatusCode(500, new { error = "Error retrieving created document from DAL." });
                 }
 
-                var document = await _documentRepository.GetDocumentByIdAsync(id);
-                if (document == null)
-                {
-                    _logger.LogWarning("Document not found for deletion: {Id}", id);
-                    return NotFound(); // Return 404
-                }
+                // Return the created document with the generated ID
+                return CreatedAtAction(nameof(GetById), new { id = createdDocument.Id }, createdDocument);
+            }
 
-                _logger.LogDebug("Deleting document from database: {Id}", id);
-                await _documentRepository.DeleteDocumentAsync(id);
+            return CreateErrorResponse("Error creating document in DAL", (int)response.StatusCode);
+        }
 
-                // publish message to RabbitMQ
-                _logger.LogDebug("Publishing document deleted event to RabbitMQ");
-                _rabbitMQPublisher.PublishDocumentDeleted(id);
-                _logger.LogInformation(DocumentEventTemplate, "deleted", id);
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, DocumentDTO documentDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage)) });
+            }
 
+            if (id != documentDto.Id)
+            {
+                return BadRequest(new { error = "ID Mismatch" });
+            }
+
+            var client = _httpClientFactory.CreateClient("DAL");
+            var document = _mapper.Map<Document>(documentDto);
+            var response = await client.PutAsJsonAsync($"/api/document/{id}", document);
+
+            if (response.IsSuccessStatusCode)
+            {
                 return NoContent();
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, DocumentErrorTemplate, "deleting", id);
-                return StatusCode(500, new { error = ex.Message });
-            }
+
+            return CreateErrorResponse("Error updating document in DAL", (int)response.StatusCode);
         }
 
-        // PUT: /document/{id}
-        [HttpPut("{id}", Name = "UpdateDocument")]
-        public async Task<IActionResult> Put(int id, [FromBody] DocumentDTO documentDTO)
+        [HttpPut("{id}/upload")]
+        public async Task<IActionResult> UploadFile(int id, IFormFile? documentFile)
         {
+            if (documentFile == null || documentFile.Length == 0)
+            {
+                return BadRequest(new { error = "No file uploaded." });
+            }
+            if (!documentFile.FileName.EndsWith(".pdf"))
+            {
+                return BadRequest(new { error = "Only PDF files are allowed." });
+            }
+
+            var client = _httpClientFactory.CreateClient("DAL");
+            var response = await client.GetAsync($"/api/document/{id}");
+            if (!response.IsSuccessStatusCode)
+            {
+                return NotFound(new { error = $"Error fetching document with ID {id}." });
+            }
+
+            var document = await response.Content.ReadFromJsonAsync<Document>();
+            if (document == null)
+            {
+                return NotFound(new { error = $"Document with ID {id} not found." });
+            }
+
+            var documentDto = _mapper.Map<DocumentDTO>(document);
+            var validator = new DocumentDTOValidator();
+            var validationResult = await validator.ValidateAsync(documentDto);
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new { errors = validationResult.Errors.Select(e => e.ErrorMessage) });
+            }
+
+            var updatedDocument = _mapper.Map<Document>(documentDto);
+            var updateResponse = await client.PutAsJsonAsync($"/api/document/{id}", updatedDocument);
+            if (!updateResponse.IsSuccessStatusCode)
+            {
+                return CreateErrorResponse("Error updating document in DAL", (int)updateResponse.StatusCode);
+            }
+
+            var filePath = Path.Combine("/app/uploads", documentFile.FileName);
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+            await using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await documentFile.CopyToAsync(stream);
+            }
+
             try
             {
-                _logger.LogInformation(DocumentActionTemplate, "update", id);
-
-                if (id <= 0) // Simple validation
-                {
-                    _logger.LogWarning("Invalid document ID provided for update: {Id}", id);
-                    return BadRequest("Invalid document ID.");
-                }
-
-                if (!ModelState.IsValid)
-                {
-                    var errors = string.Join("; ", ModelState.Values
-                        .SelectMany(v => v.Errors)
-                        .Select(e => e.ErrorMessage));
-                    _logger.LogWarning(ValidationErrorTemplate, "update", errors);
-                    return BadRequest(ModelState);
-                }
-
-                var existingDocument = await _documentRepository.GetDocumentByIdAsync(id);
-                if (existingDocument == null)
-                {
-                    _logger.LogWarning("Document not found for update: {Id}", id);
-                    return NotFound(); // Return 404 if document does not exist
-                }
-
-                // Map updated properties
-                _logger.LogDebug("Updating document properties: {Id}", id);
-                existingDocument.Title = documentDTO.Title;
-                existingDocument.Content = documentDTO.Content;
-                existingDocument.UpdatedAt = DateTime.UtcNow; // Update the last modified date
-
-                await _documentRepository.UpdateDocumentAsync(existingDocument);
-                _logger.LogInformation("Document updated successfully: {Id}", id);
-
-                // publish message to RabbitMQ
-                _logger.LogDebug("Publishing document updated event to RabbitMQ");
-                _rabbitMQPublisher.PublishDocumentUpdated(_mapper.Map<DocumentDTO>(existingDocument));
-                _logger.LogInformation(DocumentEventTemplate, "updated", id);
-
-                return NoContent(); // Return 204 No Content on successful update
+                _messageQueueService.SendToQueue($"{id}|{filePath}");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, DocumentErrorTemplate, "updating", id);
-                return StatusCode(500, new { error = ex.Message });
+                return StatusCode(500, new { error = $"Error sending the message to RabbitMQ: {ex.Message}" });
             }
+
+            return Ok(new { message = $"File {documentFile.FileName} for task {id} saved successfully." });
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var client = _httpClientFactory.CreateClient("DAL");
+            var response = await client.DeleteAsync($"/api/document/{id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return NoContent();
+            }
+
+            return CreateErrorResponse("Error deleting document from DAL", (int)response.StatusCode);
         }
     }
 }
