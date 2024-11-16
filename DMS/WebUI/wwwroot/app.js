@@ -27,9 +27,9 @@ async function fetchDocuments() {
                             <!-- First Column for Title, Content, and OCR Text -->
                             <div class="col-md-8">
                                 <h5 class="card-title">${doc.title}</h5>
-                                ${doc.ocrText
+                                <!-- ${doc.ocrText
                         ? `<p class="card-text"><strong>OCR Text:</strong> ${doc.ocrText}</p>`
-                        : '<p class="card-text text-muted">OCR Text: Not available</p>'}
+                        : '<p class="card-text text-muted">OCR Text: Not available</p>'}-->
                             </div>
 
                             <!-- Second Column for Metadata and Buttons -->
