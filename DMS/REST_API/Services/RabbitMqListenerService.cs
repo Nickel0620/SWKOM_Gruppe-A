@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Net.Http;
@@ -12,58 +13,73 @@ namespace REST_API.Services
 {
     public class RabbitMqListenerService : IHostedService
     {
+        private readonly ILogger<RabbitMqListenerService> _logger;
+        private readonly IHttpClientFactory _httpClientFactory;
         private IConnection _connection;
         private IModel _channel;
-        private readonly IHttpClientFactory _httpClientFactory;
 
-        public RabbitMqListenerService(IHttpClientFactory httpClientFactory)
+        public RabbitMqListenerService(IHttpClientFactory httpClientFactory, ILogger<RabbitMqListenerService> logger, IConnection connection = null)
         {
             _httpClientFactory = httpClientFactory;
+            _logger = logger;
+            _connection = connection;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Starting RabbitMQ Listener Service...");
             ConnectToRabbitMQ();
             StartListening();
             return Task.CompletedTask;
         }
 
-        private void ConnectToRabbitMQ()
+        public void ConnectToRabbitMQ()
         {
-            int retries = 5;
-            while (retries > 0)
+            if (_connection == null)
             {
-                try
+                int retries = 5;
+                while (retries > 0)
                 {
-                    var factory = new ConnectionFactory
+                    try
                     {
-                        HostName = "rabbitmq",
-                        Port = 5672,
-                        UserName = "guest",
-                        Password = "guest"
-                    };
-                    _connection = factory.CreateConnection();
-                    _channel = _connection.CreateModel();
+                        var factory = new ConnectionFactory
+                        {
+                            HostName = "rabbitmq",
+                            Port = 5672,
+                            UserName = "guest",
+                            Password = "guest"
+                        };
 
-                    _channel.QueueDeclare(queue: "ocr_result_queue", durable: false, exclusive: false, autoDelete: false, arguments: null);
-                    Console.WriteLine("Successfully connected to RabbitMQ and queue declared.");
-                    break;
+                        _connection = factory.CreateConnection();
+                        _channel = _connection.CreateModel();
+
+                        _channel.QueueDeclare(queue: "ocr_result_queue", durable: false, exclusive: false, autoDelete: false, arguments: null);
+                        _logger.LogInformation("Successfully connected to RabbitMQ and declared the queue.");
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error connecting to RabbitMQ. Retrying in 5 seconds...");
+                        Thread.Sleep(5000);
+                        retries--;
+                    }
                 }
-                catch (Exception ex)
+
+                if (_connection == null || !_connection.IsOpen)
                 {
-                    Console.WriteLine($"Error connecting to RabbitMQ: {ex.Message}. Retrying in 5 seconds...");
-                    Thread.Sleep(5000);
-                    retries--;
+                    _logger.LogCritical("Failed to connect to RabbitMQ after multiple attempts.");
+                    throw new Exception("Failed to connect to RabbitMQ after multiple attempts.");
                 }
             }
-
-            if (_connection == null || !_connection.IsOpen)
+            else
             {
-                throw new Exception("Failed to connect to RabbitMQ after multiple attempts.");
+                _channel = _connection.CreateModel();
+                _channel.QueueDeclare(queue: "ocr_result_queue", durable: false, exclusive: false, autoDelete: false, arguments: null);
+                _logger.LogInformation("Reused existing RabbitMQ connection and declared the queue.");
             }
         }
 
-        private void StartListening()
+        public void StartListening()
         {
             try
             {
@@ -72,9 +88,9 @@ namespace REST_API.Services
                 {
                     var body = ea.Body.ToArray();
                     var message = Encoding.UTF8.GetString(body);
-                    var parts = message.Split('|', 2);
+                    _logger.LogInformation("Received message: {Message}", message);
 
-                    Console.WriteLine($"[Listener] Received message: {message}");
+                    var parts = message.Split('|', 2);
 
                     if (parts.Length == 2)
                     {
@@ -83,7 +99,7 @@ namespace REST_API.Services
 
                         if (string.IsNullOrEmpty(extractedText))
                         {
-                            Console.WriteLine($"Error: Empty OCR text for Task {id}. Message will be ignored.");
+                            _logger.LogWarning("Message for Task {Id} contains empty OCR text. Ignoring message.", id);
                             return;
                         }
 
@@ -91,48 +107,47 @@ namespace REST_API.Services
                         bool documentUpdated = false;
 
                         await Task.Delay(500); // Initial delay before retrying
-                        // Retry mechanism for fetching and updating the document
+
                         for (int attempt = 1; attempt <= 3; attempt++)
                         {
                             try
                             {
                                 var response = await client.GetAsync($"/api/document/{id}");
-
-                                Console.WriteLine($"Response Status Code: {response.StatusCode}");
+                                _logger.LogInformation("Attempt {Attempt}: Response Status Code for document {Id}: {StatusCode}", attempt, id, response.StatusCode);
 
                                 if (response.IsSuccessStatusCode)
                                 {
                                     var document = await response.Content.ReadFromJsonAsync<Document>();
                                     if (document != null)
                                     {
-                                        Console.WriteLine($"[Listener] Document {id} retrieved successfully on attempt {attempt}.");
+                                        _logger.LogInformation("Document {Id} retrieved successfully on attempt {Attempt}.", id, attempt);
                                         document.OcrText = extractedText;
 
                                         var updateResponse = await client.PutAsJsonAsync($"/api/document/{id}", document);
                                         if (updateResponse.IsSuccessStatusCode)
                                         {
-                                            Console.WriteLine($"OCR text for Document {id} updated successfully.");
+                                            _logger.LogInformation("OCR text for Document {Id} updated successfully.", id);
                                             documentUpdated = true;
                                             break;
                                         }
                                         else
                                         {
-                                            Console.WriteLine($"Error updating document with ID {id}: {updateResponse.StatusCode}");
+                                            _logger.LogError("Error updating document {Id}. Response: {StatusCode}", id, updateResponse.StatusCode);
                                         }
                                     }
                                     else
                                     {
-                                        Console.WriteLine($"[Listener] Document {id} not found on attempt {attempt}.");
+                                        _logger.LogWarning("Document {Id} not found on attempt {Attempt}.", id, attempt);
                                     }
                                 }
                                 else
                                 {
-                                    Console.WriteLine($"Error retrieving document with ID {id} on attempt {attempt}: {response.StatusCode}");
+                                    _logger.LogWarning("Failed to retrieve document {Id} on attempt {Attempt}. Response: {StatusCode}", id, attempt, response.StatusCode);
                                 }
                             }
                             catch (Exception ex)
                             {
-                                Console.WriteLine($"Exception while processing document {id} on attempt {attempt}: {ex.Message}");
+                                _logger.LogError(ex, "Exception while processing document {Id} on attempt {Attempt}.", id, attempt);
                             }
 
                             // Wait before retrying
@@ -141,29 +156,41 @@ namespace REST_API.Services
 
                         if (!documentUpdated)
                         {
-                            Console.WriteLine($"Failed to update document {id} after multiple attempts.");
+                            _logger.LogWarning("Failed to update document {Id} after multiple attempts.", id);
                         }
                     }
                     else
                     {
-                        Console.WriteLine("Error: Invalid message received.");
+                        _logger.LogWarning("Invalid message received: {Message}", message);
                     }
                 };
 
                 _channel.BasicConsume(queue: "ocr_result_queue", autoAck: true, consumer: consumer);
-                Console.WriteLine("Started listening on queue: ocr_result_queue");
+                _logger.LogInformation("Started listening on queue: ocr_result_queue");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error starting listener for OCR results: {ex.Message}");
+                _logger.LogError(ex, "Error starting listener for OCR results.");
             }
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            _channel?.Close();
-            _connection?.Close();
-            Console.WriteLine("RabbitMQ Listener Service stopped.");
+            _logger.LogInformation("Stopping RabbitMQ Listener Service...");
+
+            if (_channel?.IsOpen == true)
+            {
+                _logger.LogInformation("Closing RabbitMQ channel...");
+                _channel.Close();
+            }
+
+            if (_connection?.IsOpen == true)
+            {
+                _logger.LogInformation("Closing RabbitMQ connection...");
+                _connection.Close();
+            }
+
+            _logger.LogInformation("RabbitMQ Listener Service stopped.");
             return Task.CompletedTask;
         }
     }

@@ -23,6 +23,13 @@ namespace REST_API.Services
             _channel.QueueDeclare(queue: "file_queue", durable: false, exclusive: false, autoDelete: false, arguments: null);
         }
 
+        public MessageQueueService(IConnection connection, IModel channel)
+        {
+            _connection = connection ?? throw new ArgumentNullException(nameof(connection));
+            _channel = channel ?? throw new ArgumentNullException(nameof(channel));
+            _channel.QueueDeclare(queue: "file_queue", durable: false, exclusive: false, autoDelete: false, arguments: null);
+        }
+
         public void SendToQueue(string message)
         {
             var body = Encoding.UTF8.GetBytes(message);

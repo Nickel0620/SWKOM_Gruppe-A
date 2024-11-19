@@ -1,0 +1,16 @@
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="Code Coverage">
+        <Configuration>
+          <Exclude>
+            <!-- Exclude namespaces -->
+            <Namespace>DAL.Migrations.*</Namespace>
+            <!-- Exclude all Program.cs files -->
+            <File>**/Program.cs</File>
+          </Exclude>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

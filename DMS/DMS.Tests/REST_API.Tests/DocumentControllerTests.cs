@@ -1,183 +1,211 @@
-﻿//using System.Net;
-//using System.Net.Http;
-//using System.Threading.Tasks;
-//using Xunit;
-//using Moq;
-//using Microsoft.AspNetCore.Mvc;
-//using REST_API.Controllers;
-//using REST_API.DTOs;
-//using AutoMapper;
-//using REST_API.Services;
-//using System.Collections.Generic;
-//using System.Text.Json;
-//using System.Linq;
-//using DAL.Entities;
-//using Moq.Protected;
+﻿using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Xunit;
+using Moq;
+using Microsoft.AspNetCore.Mvc;
+using REST_API.Controllers;
+using REST_API.DTOs;
+using AutoMapper;
+using REST_API.Services;
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Linq;
+using DAL.Entities;
+using Moq.Protected;
+using System.ComponentModel.DataAnnotations;
 
-//namespace DMS.Tests.REST_API.Tests
-//{
-//    public class DocumentControllerTests
-//    {
-//        private readonly Mock<IHttpClientFactory> _httpClientFactoryMock;
-//        private readonly Mock<IMapper> _mapperMock;
-//        private readonly Mock<IMessageQueueService> _messageQueueServiceMock;
-//        private readonly DocumentController _controller;
+namespace DMS.Tests.REST_API.Tests
+{
+    public class DocumentControllerTests
+    {
+        private readonly Mock<IHttpClientFactory> _httpClientFactoryMock;
+        private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<IMessageQueueService> _messageQueueServiceMock;
+        private readonly DocumentController _controller;
 
-//        public DocumentControllerTests()
-//        {
-//            _httpClientFactoryMock = new Mock<IHttpClientFactory>();
-//            _mapperMock = new Mock<IMapper>();
-//            _messageQueueServiceMock = new Mock<IMessageQueueService>();
-//            _controller = new DocumentController(_httpClientFactoryMock.Object, _mapperMock.Object, _messageQueueServiceMock.Object);
-//        }
+        public DocumentControllerTests()
+        {
+            _httpClientFactoryMock = new Mock<IHttpClientFactory>();
+            _mapperMock = new Mock<IMapper>();
+            _messageQueueServiceMock = new Mock<IMessageQueueService>();
+            _controller = new DocumentController(_httpClientFactoryMock.Object, _mapperMock.Object, _messageQueueServiceMock.Object);
+        }
 
-//        [Fact]
-//        public async Task Get_ReturnsOkWithDocuments()
-//        {
-//            // Arrange
-//            var mockClient = new Mock<HttpMessageHandler>();
-//            var documents = new List<Document> { new Document { Id = 1, Title = "Test Title" } };
-//            var jsonResponse = JsonSerializer.Serialize(documents);
-//            mockClient.Protected()
-//                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-//                .ReturnsAsync(new HttpResponseMessage
-//                {
-//                    StatusCode = HttpStatusCode.OK,
-//                    Content = new StringContent(jsonResponse)
-//                });
+        [Fact]
+        public async Task Get_ReturnsOkWithDocuments()
+        {
+            // Arrange
+            var documents = new List<Document>
+    {
+        new Document { Id = 1, Title = "Test Document 1" },
+        new Document { Id = 2, Title = "Test Document 2" }
+    };
+            var dtoDocuments = new List<DocumentDTO>
+    {
+        new DocumentDTO { Id = 1, Title = "Test Document 1" },
+        new DocumentDTO { Id = 2, Title = "Test Document 2" }
+    };
 
-//            var client = new HttpClient(mockClient.Object);
-//            _httpClientFactoryMock.Setup(f => f.CreateClient("DAL")).Returns(client);
-//            _mapperMock.Setup(m => m.Map<IEnumerable<DocumentDTO>>(It.IsAny<IEnumerable<Document>>()))
-//                       .Returns(documents.Select(d => new DocumentDTO { Id = d.Id, Title = d.Title }));
+            var jsonResponse = JsonSerializer.Serialize(documents);
 
-//            // Act
-//            var result = await _controller.Get();
+            var mockClient = new Mock<HttpMessageHandler>();
+            mockClient.Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(jsonResponse)
+                });
 
-//            // Assert
-//            var okResult = Assert.IsType<OkObjectResult>(result);
-//            var returnedDocuments = Assert.IsAssignableFrom<IEnumerable<DocumentDTO>>(okResult.Value);
-//            Assert.Single(returnedDocuments);
-//            Assert.Equal("Test Title", returnedDocuments.First().Title);
-//        }
+            var client = new HttpClient(mockClient.Object)
+            {
+                BaseAddress = new Uri("http://localhost") 
+            };
 
-//        [Fact]
-//        public async Task Get_ReturnsErrorWhenDALFails()
-//        {
-//            // Arrange
-//            var mockClient = new Mock<HttpMessageHandler>();
-//            mockClient.Protected()
-//                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-//                .ReturnsAsync(new HttpResponseMessage
-//                {
-//                    StatusCode = HttpStatusCode.InternalServerError
-//                });
+            _httpClientFactoryMock.Setup(f => f.CreateClient("DAL")).Returns(client);
+            _mapperMock.Setup(m => m.Map<IEnumerable<DocumentDTO>>(It.IsAny<IEnumerable<Document>>())).Returns(dtoDocuments);
 
-//            var client = new HttpClient(mockClient.Object);
-//            _httpClientFactoryMock.Setup(f => f.CreateClient("DAL")).Returns(client);
+            // Act
+            var result = await _controller.Get();
 
-//            // Act
-//            var result = await _controller.Get();
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnedDocuments = Assert.IsType<List<DocumentDTO>>(okResult.Value);
+            Assert.Equal(2, returnedDocuments.Count);
+            Assert.Equal(1, returnedDocuments[0].Id);
+            Assert.Equal("Test Document 1", returnedDocuments[0].Title);
+            Assert.Equal(2, returnedDocuments[1].Id);
+            Assert.Equal("Test Document 2", returnedDocuments[1].Title);
+        }
 
-//            // Assert
-//            var errorResult = Assert.IsType<ObjectResult>(result);
-//            Assert.Equal(500, errorResult.StatusCode);
-//        }
+        [Fact]
+        public async Task Get_ReturnsErrorWhenDALFails()
+        {
+            // Arrange
+            var mockClient = new Mock<HttpMessageHandler>();
+            mockClient.Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                });
 
-//        [Fact]
-//        public async Task Create_ValidDocument_ReturnsCreated()
-//        {
-//            // Arrange
-//            var documentDto = new DocumentDTO { Id = 1, Title = "Test Title" };
-//            var document = new Document { Id = 1, Title = "Test Title" };
-//            var jsonResponse = JsonSerializer.Serialize(document);
+            var client = new HttpClient(mockClient.Object)
+            {
+                BaseAddress = new Uri("http://localhost") 
+            };
+            _httpClientFactoryMock.Setup(f => f.CreateClient("DAL")).Returns(client);
 
-//            var mockClient = new Mock<HttpMessageHandler>();
-//            mockClient.Protected()
-//                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-//                .ReturnsAsync(new HttpResponseMessage
-//                {
-//                    StatusCode = HttpStatusCode.Created,
-//                    Content = new StringContent(jsonResponse)
-//                });
+            // Act
+            var result = await _controller.Get();
 
-//            var client = new HttpClient(mockClient.Object);
-//            _httpClientFactoryMock.Setup(f => f.CreateClient("DAL")).Returns(client);
-//            _mapperMock.Setup(m => m.Map<Document>(It.IsAny<DocumentDTO>())).Returns(document);
+            // Assert
+            var errorResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, errorResult.StatusCode);
+        }
 
-//            // Act
-//            var result = await _controller.Create(documentDto);
+        [Fact]
+        public async Task Create_ValidDocument_ReturnsCreated()
+        {
+            // Arrange
+            var documentDto = new DocumentDTO { Id = 1, Title = "Test Title" };
+            var document = new Document { Id = 1, Title = "Test Title" };
+            var jsonResponse = JsonSerializer.Serialize(document);
 
-//            // Assert
-//            var createdResult = Assert.IsType<CreatedAtActionResult>(result);
-//            var returnedDocument = Assert.IsType<Document>(createdResult.Value);
-//            Assert.Equal(1, returnedDocument.Id);
-//            Assert.Equal("Test Title", returnedDocument.Title);
-//        }
+            var mockClient = new Mock<HttpMessageHandler>();
+            mockClient.Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.Created,
+                    Content = new StringContent(jsonResponse)
+                });
 
-//        [Fact]
-//        public async Task Create_InvalidModel_ReturnsBadRequest()
-//        {
-//            // Arrange
-//            var documentDto = new DocumentDTO();
-//            _controller.ModelState.AddModelError("Title", "The Title field is required.");
+            var client = new HttpClient(mockClient.Object)
+            {
+                BaseAddress = new Uri("http://localhost") 
+            };
+            _httpClientFactoryMock.Setup(f => f.CreateClient("DAL")).Returns(client);
+            _mapperMock.Setup(m => m.Map<Document>(It.IsAny<DocumentDTO>())).Returns(document);
 
-//            // Act
-//            var result = await _controller.Create(documentDto);
+            // Act
+            var result = await _controller.Create(documentDto);
 
-//            // Assert
-//            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-//            var errors = Assert.IsAssignableFrom<IEnumerable<string>>(badRequestResult.Value);
-//            Assert.Contains("The Title field is required.", errors);
-//        }
+            // Assert
+            var createdResult = Assert.IsType<CreatedAtActionResult>(result);
+            var returnedDocument = Assert.IsType<Document>(createdResult.Value);
+            Assert.Equal(1, returnedDocument.Id);
+            Assert.Equal("Test Title", returnedDocument.Title);
+        }
 
-//        [Fact]
-//        public async Task Update_ValidDocument_ReturnsNoContent()
-//        {
-//            // Arrange
-//            var documentDto = new DocumentDTO { Id = 1, Title = "Updated Title" };
-//            var document = new Document { Id = 1, Title = "Updated Title" };
+        [Fact]
+        public async Task Create_InvalidModel_ReturnsBadRequest()
+        {
+            // Arrange
+            var documentDto = new DocumentDTO { Id = 1, Title = "Test Title" };
+            _controller.ModelState.AddModelError("CreatedAt", "CreatedAt is required");
 
-//            var mockClient = new Mock<HttpMessageHandler>();
-//            mockClient.Protected()
-//                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-//                .ReturnsAsync(new HttpResponseMessage
-//                {
-//                    StatusCode = HttpStatusCode.NoContent
-//                });
+            // Act
+            var result = await _controller.Create(documentDto);
 
-//            var client = new HttpClient(mockClient.Object);
-//            _httpClientFactoryMock.Setup(f => f.CreateClient("DAL")).Returns(client);
-//            _mapperMock.Setup(m => m.Map<Document>(It.IsAny<DocumentDTO>())).Returns(document);
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
 
-//            // Act
-//            var result = await _controller.Update(1, documentDto);
+        [Fact]
+        public async Task Update_ValidDocument_ReturnsNoContent()
+        {
+            // Arrange
+            var documentDto = new DocumentDTO { Id = 1, Title = "Updated Title" };
+            var document = new Document { Id = 1, Title = "Updated Title" };
 
-//            // Assert
-//            Assert.IsType<NoContentResult>(result);
-//        }
+            var mockClient = new Mock<HttpMessageHandler>();
+            mockClient.Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.NoContent
+                });
 
-//        [Fact]
-//        public async Task Delete_ValidId_ReturnsNoContent()
-//        {
-//            // Arrange
-//            var mockClient = new Mock<HttpMessageHandler>();
-//            mockClient.Protected()
-//                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-//                .ReturnsAsync(new HttpResponseMessage
-//                {
-//                    StatusCode = HttpStatusCode.NoContent
-//                });
+            var client = new HttpClient(mockClient.Object)
+            {
+                BaseAddress = new Uri("http://localhost") 
+            };
+            _httpClientFactoryMock.Setup(f => f.CreateClient("DAL")).Returns(client);
+            _mapperMock.Setup(m => m.Map<Document>(It.IsAny<DocumentDTO>())).Returns(document);
 
-//            var client = new HttpClient(mockClient.Object);
-//            _httpClientFactoryMock.Setup(f => f.CreateClient("DAL")).Returns(client);
+            // Act
+            var result = await _controller.Update(1, documentDto);
 
-//            // Act
-//            var result = await _controller.Delete(1);
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+        }
 
-//            // Assert
-//            Assert.IsType<NoContentResult>(result);
-//        }
-//    }
+        [Fact]
+        public async Task Delete_ValidId_ReturnsNoContent()
+        {
+            // Arrange
+            var mockClient = new Mock<HttpMessageHandler>();
+            mockClient.Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.NoContent
+                });
 
-//}
+            var client = new HttpClient(mockClient.Object)
+            {
+                BaseAddress = new Uri("http://localhost")
+            };
+            _httpClientFactoryMock.Setup(f => f.CreateClient("DAL")).Returns(client);
+
+            // Act
+            var result = await _controller.Delete(1);
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+        }
+    }
+
+}
