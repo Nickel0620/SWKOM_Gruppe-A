@@ -9,5 +9,6 @@ namespace REST_API.DTOs
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public string? OcrText { get; set; }
+        public string? FilePath { get; set; }
     }
 }

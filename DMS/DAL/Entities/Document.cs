@@ -12,6 +12,7 @@ namespace DAL.Entities
         public DateTime? CreatedAt { get; set; } = DateTime.Now;
         public DateTime? UpdatedAt { get; set; } = DateTime.Now;
         public string? OcrText { get; set; }
+        public string? FilePath { get; set; }
 
     }
 }
