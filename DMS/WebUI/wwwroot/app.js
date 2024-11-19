@@ -28,8 +28,12 @@ async function fetchDocuments() {
                             <div class="col-md-8">
                                 <h5 class="card-title">${doc.title}</h5>
                                 <!-- ${doc.ocrText
-                        ? `<p class="card-text"><strong>OCR Text:</strong> ${doc.ocrText}</p>`
-                        : '<p class="card-text text-muted">OCR Text: Not available</p>'}-->
+                                    ? `<p class="card-text"><strong>OCR Text:</strong> ${doc.ocrText}</p>`
+                                    : '<p class="card-text text-muted">OCR Text: Not available</p>'} -->
+                                <!-- Button to open modal -->
+                                ${doc.ocrText
+                        ? `<button class="btn btn-info" onclick="showOcrText('${doc.ocrText}')">View OCR Text</button>`
+                        : ''}
                             </div>
 
                             <!-- Second Column for Metadata and Buttons -->
@@ -53,8 +57,6 @@ async function fetchDocuments() {
                                 </div>
                                 <div class="row mt-auto">
                                     <div class="col text-right margin-top">
-                                        <!-- Edit Button -->
-                                        <!-- <button class="btn btn-info text-uppercase" onclick="openEditModal(${doc.id}, '${doc.title}', '${doc.content}')">Edit</button> -->
                                         <!-- Delete Button -->
                                         <button class="btn btn-danger text-uppercase" onclick="deleteDocument(${doc.id})">Delete</button>
                                     </div>
@@ -70,6 +72,13 @@ async function fetchDocuments() {
         console.error('Error fetching documents:', error);
         documentList.innerHTML = 'Failed to fetch documents: ' + error.message;
     }
+}
+
+// Function to show the OCR Text in the modal
+function showOcrText(ocrText) {
+    const ocrTextContent = document.getElementById('ocrTextContent');
+    ocrTextContent.textContent = ocrText; // Set OCR text content
+    $('#ocrTextModal').modal('show'); // Show the modal using Bootstrap
 }
 
 // Helper function to format the date
