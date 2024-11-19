@@ -1,0 +1,163 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="074884f8-32cf-4131-be47-a113377802e7" name="melih@SOLT-DESKTOP 2024-11-19 04:55:57" runUser="SOLT-DESKTOP\melih" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2024-11-19T04:55:57.6492412+01:00" queuing="2024-11-19T04:55:57.6492416+01:00" start="2024-11-19T04:55:55.9943526+01:00" finish="2024-11-19T04:55:58.2886692+01:00" />
+  <TestSettings name="default" id="2f6fa91e-6cdc-4ebc-b7ae-ad96a25362f9">
+    <Deployment runDeploymentRoot="melih_SOLT-DESKTOP_2024-11-19_04_55_57" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="a15b3c28-ba95-4bae-b558-84445de7ae2a" testId="100a8810-a735-3dab-8b37-9ac82cc3a11d" testName="DMS.Tests.DAL.Tests.DocumentRepositoryTests.GetAllDocumentsAsync_ReturnsAllDocuments" computerName="SOLT-DESKTOP" duration="00:00:00.0010306" startTime="2024-11-19T04:55:57.9904207+01:00" endTime="2024-11-19T04:55:57.9904207+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a15b3c28-ba95-4bae-b558-84445de7ae2a" />
+    <UnitTestResult executionId="7a187b5f-9673-4f1d-b6c9-31a4c679c0c5" testId="a13993a8-9272-3364-07c1-b94586b86fda" testName="OcrProcessing.Tests.OcrWorkerTests.Constructor_ShouldSetupQueues" computerName="SOLT-DESKTOP" duration="00:00:00.1122046" startTime="2024-11-19T04:55:57.6087173+01:00" endTime="2024-11-19T04:55:57.6087174+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7a187b5f-9673-4f1d-b6c9-31a4c679c0c5" />
+    <UnitTestResult executionId="d9bfcb51-c3c7-46cf-b4f1-1a31f471ea47" testId="42a4510b-d56c-7ec0-3205-3fd5d56f97ea" testName="DMS.Tests.DAL.Tests.DocumentRepositoryTests.AddDocumentAsync_ValidDocument_AddsDocument" computerName="SOLT-DESKTOP" duration="00:00:00.0070924" startTime="2024-11-19T04:55:57.9996379+01:00" endTime="2024-11-19T04:55:57.9996381+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d9bfcb51-c3c7-46cf-b4f1-1a31f471ea47" />
+    <UnitTestResult executionId="95a4dea3-7625-4d26-9942-f27e79ea8f1e" testId="c522b74f-978a-52a9-8a65-d8529634f6e5" testName="DMS.Tests.DAL.Tests.DocumentControllerTests.UpdateAsync_NonExistingId_ReturnsNotFound" computerName="SOLT-DESKTOP" duration="00:00:00.0008650" startTime="2024-11-19T04:55:57.6098822+01:00" endTime="2024-11-19T04:55:57.6098822+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="95a4dea3-7625-4d26-9942-f27e79ea8f1e" />
+    <UnitTestResult executionId="bdafcb2b-8baf-4761-bcd7-6efda005154a" testId="2eabd483-db2d-fe6e-b81f-edcbf7fdb5c3" testName="DMS.Tests.DAL.Tests.DocumentRepositoryTests.GetDocumentByIdAsync_NonExistingId_ReturnsNull" computerName="SOLT-DESKTOP" duration="00:00:00.0020297" startTime="2024-11-19T04:55:57.9924913+01:00" endTime="2024-11-19T04:55:57.9924914+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bdafcb2b-8baf-4761-bcd7-6efda005154a" />
+    <UnitTestResult executionId="c8c450a2-c621-4bc6-afb8-83053d85bbb0" testId="14df28af-b544-fee0-1bd3-f40d70cf1eab" testName="OcrProcessing.Tests.OcrWorkerTests.ReceivedEvent_ShouldLogError_OnInvalidMessage" computerName="SOLT-DESKTOP" duration="00:00:00.0044073" startTime="2024-11-19T04:55:57.8731870+01:00" endTime="2024-11-19T04:55:57.8731871+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c8c450a2-c621-4bc6-afb8-83053d85bbb0" />
+    <UnitTestResult executionId="cce2e9d4-5f32-4af8-866c-9c0018b1080f" testId="f3abb41d-598b-86b1-ee9e-bf3264d05563" testName="DMS.Tests.DAL.Tests.DocumentControllerTests.GetByIdAsync_ExistingId_ReturnsDocument" computerName="SOLT-DESKTOP" duration="00:00:00.0006027" startTime="2024-11-19T04:55:57.6096018+01:00" endTime="2024-11-19T04:55:57.6096018+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cce2e9d4-5f32-4af8-866c-9c0018b1080f" />
+    <UnitTestResult executionId="e868a39d-7abb-4c82-9a9b-8052d93b034a" testId="d8b2c2e7-e130-b52f-2f24-2276c0b0793a" testName="OcrProcessing.Tests.OcrWorkerTests.ReceivedEvent_ShouldAckMessage_OnSuccessfulProcessing" computerName="SOLT-DESKTOP" duration="00:00:00.0021827" startTime="2024-11-19T04:55:57.8762703+01:00" endTime="2024-11-19T04:55:57.8762705+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e868a39d-7abb-4c82-9a9b-8052d93b034a" />
+    <UnitTestResult executionId="7a028b10-a7b8-4d29-bf87-dd437f368dd1" testId="9838b7f8-29a9-f21c-8077-2735b8887ec0" testName="DMS.Tests.DAL.Tests.DocumentRepositoryTests.UpdateDocumentAsync_ValidDocument_UpdatesDocument" computerName="SOLT-DESKTOP" duration="00:00:00.0045033" startTime="2024-11-19T04:55:57.9893575+01:00" endTime="2024-11-19T04:55:57.9893576+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7a028b10-a7b8-4d29-bf87-dd437f368dd1" />
+    <UnitTestResult executionId="9a054813-2bcd-4557-b159-4e4504840c5d" testId="3780a6e0-910c-3a43-c1c4-8ebb0056ddc3" testName="DMS.Tests.DAL.Tests.DocumentControllerTests.CreateAsync_ValidDocument_ReturnsOk" computerName="SOLT-DESKTOP" duration="00:00:00.1068366" startTime="2024-11-19T04:55:57.6028750+01:00" endTime="2024-11-19T04:55:57.6028895+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9a054813-2bcd-4557-b159-4e4504840c5d" />
+    <UnitTestResult executionId="97771ea4-9f25-4a8e-9db3-ae1080ec2cd8" testId="f54e2825-2ddb-ab75-b6f1-12adafb18105" testName="DMS.Tests.DAL.Tests.DocumentRepositoryTests.GetDocumentByIdAsync_ExistingId_ReturnsDocument" computerName="SOLT-DESKTOP" duration="00:00:00.0100052" startTime="2024-11-19T04:55:57.9848055+01:00" endTime="2024-11-19T04:55:57.9848056+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="97771ea4-9f25-4a8e-9db3-ae1080ec2cd8" />
+    <UnitTestResult executionId="a1776b0a-9405-4a0e-bd2b-67c3d5e19df2" testId="1674d145-8b2c-6f0b-7b31-041478f23d71" testName="DMS.Tests.DAL.Tests.DocumentRepositoryTests.DeleteDocumentAsync_ExistingId_DeletesDocument" computerName="SOLT-DESKTOP" duration="00:00:00.4255590" startTime="2024-11-19T04:55:57.9176925+01:00" endTime="2024-11-19T04:55:57.9176926+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a1776b0a-9405-4a0e-bd2b-67c3d5e19df2" />
+    <UnitTestResult executionId="dac65bec-d6b4-4558-8c98-d74d4a7b69fb" testId="a1983ff4-ee85-effe-8d1a-c9a8978be153" testName="OcrProcessing.Tests.OcrWorkerTests.StopAsync_ShouldCloseConnectionAndChannel" computerName="SOLT-DESKTOP" duration="00:00:00.0008249" startTime="2024-11-19T04:55:57.8740453+01:00" endTime="2024-11-19T04:55:57.8740453+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dac65bec-d6b4-4558-8c98-d74d4a7b69fb" />
+    <UnitTestResult executionId="3836adb2-751c-4cd8-9054-3e2d199cfb7d" testId="379d6117-2117-a7da-7e7d-5073b3185a11" testName="DMS.Tests.DAL.Tests.DocumentRepositoryTests.DeleteDocumentAsync_NonExistingId_LogsWarning" computerName="SOLT-DESKTOP" duration="00:00:00.0569612" startTime="2024-11-19T04:55:57.9747308+01:00" endTime="2024-11-19T04:55:57.9747310+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3836adb2-751c-4cd8-9054-3e2d199cfb7d" />
+    <UnitTestResult executionId="acd2c2fe-2755-4da8-845f-01555e90b4a8" testId="9e3fb1f3-16c0-410f-656f-2db518fa6b44" testName="DMS.Tests.DAL.Tests.DocumentControllerTests.DeleteAsync_NonExistingId_ReturnsNotFound" computerName="SOLT-DESKTOP" duration="00:00:00.0008001" startTime="2024-11-19T04:55:57.6101064+01:00" endTime="2024-11-19T04:55:57.6101065+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="acd2c2fe-2755-4da8-845f-01555e90b4a8" />
+    <UnitTestResult executionId="3c50d40d-b736-4476-aa51-48fbad0839da" testId="cab1eb2a-816f-1a2e-d518-f48a1b7c887e" testName="OcrProcessing.Tests.OcrWorkerTests.StartAsync_ShouldConsumeMessagesFromQueue" computerName="SOLT-DESKTOP" duration="00:00:00.0086372" startTime="2024-11-19T04:55:57.6289039+01:00" endTime="2024-11-19T04:55:57.6289039+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3c50d40d-b736-4476-aa51-48fbad0839da" />
+    <UnitTestResult executionId="a9fde469-3707-4f8c-aaa3-e288165e31de" testId="f23ec38a-d656-e140-0103-a68117be0ba8" testName="DMS.Tests.DAL.Tests.DocumentControllerTests.DeleteAsync_ExistingId_DeletesAndReturnsNoContent" computerName="SOLT-DESKTOP" duration="00:00:00.0029326" startTime="2024-11-19T04:55:57.6108407+01:00" endTime="2024-11-19T04:55:57.6108408+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a9fde469-3707-4f8c-aaa3-e288165e31de" />
+    <UnitTestResult executionId="0d5330e9-4257-4c2d-ad25-de992c9c87ea" testId="891f0a6f-d234-0d19-7745-a8fcc30b4d8f" testName="DMS.Tests.DAL.Tests.DocumentControllerTests.UpdateAsync_ExistingId_UpdatesAndReturnsNoContent" computerName="SOLT-DESKTOP" duration="00:00:00.0012884" startTime="2024-11-19T04:55:57.6285891+01:00" endTime="2024-11-19T04:55:57.6285892+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0d5330e9-4257-4c2d-ad25-de992c9c87ea" />
+    <UnitTestResult executionId="f10ed46b-63c4-4f0c-896b-20917c2d3c6e" testId="ba99a799-d7ff-39e6-6c75-18a8c8103583" testName="DMS.Tests.DAL.Tests.DocumentControllerTests.GetAsync_ReturnsAllDocuments" computerName="SOLT-DESKTOP" duration="00:00:00.0011647" startTime="2024-11-19T04:55:57.6291324+01:00" endTime="2024-11-19T04:55:57.6291325+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f10ed46b-63c4-4f0c-896b-20917c2d3c6e" />
+    <UnitTestResult executionId="913e27d8-9267-4434-884f-46ad42fc0a0c" testId="ed775d5b-a446-722a-c70b-b2f328f1f468" testName="OcrProcessing.Tests.OcrWorkerTests.PerformOcrAsync_ReturnsExtractedTextFromPdf" computerName="SOLT-DESKTOP" duration="00:00:00.2532337" startTime="2024-11-19T04:55:57.8679095+01:00" endTime="2024-11-19T04:55:57.8679099+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="913e27d8-9267-4434-884f-46ad42fc0a0c" />
+    <UnitTestResult executionId="a0486d79-f8a2-48a3-9140-478b33080441" testId="96d9d443-d78a-5013-0064-0700aec5d465" testName="DMS.Tests.DAL.Tests.DocumentControllerTests.GetByIdAsync_NonExistingId_ReturnsNotFound" computerName="SOLT-DESKTOP" duration="00:00:00.0030050" startTime="2024-11-19T04:55:57.6092790+01:00" endTime="2024-11-19T04:55:57.6092790+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a0486d79-f8a2-48a3-9140-478b33080441" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="DMS.Tests.DAL.Tests.DocumentRepositoryTests.GetDocumentByIdAsync_ExistingId_ReturnsDocument" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="f54e2825-2ddb-ab75-b6f1-12adafb18105">
+      <Execution id="97771ea4-9f25-4a8e-9db3-ae1080ec2cd8" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="DMS.Tests.DAL.Tests.DocumentRepositoryTests" name="GetDocumentByIdAsync_ExistingId_ReturnsDocument" />
+    </UnitTest>
+    <UnitTest name="DMS.Tests.DAL.Tests.DocumentRepositoryTests.DeleteDocumentAsync_ExistingId_DeletesDocument" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="1674d145-8b2c-6f0b-7b31-041478f23d71">
+      <Execution id="a1776b0a-9405-4a0e-bd2b-67c3d5e19df2" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="DMS.Tests.DAL.Tests.DocumentRepositoryTests" name="DeleteDocumentAsync_ExistingId_DeletesDocument" />
+    </UnitTest>
+    <UnitTest name="OcrProcessing.Tests.OcrWorkerTests.Constructor_ShouldSetupQueues" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="a13993a8-9272-3364-07c1-b94586b86fda">
+      <Execution id="7a187b5f-9673-4f1d-b6c9-31a4c679c0c5" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="OcrProcessing.Tests.OcrWorkerTests" name="Constructor_ShouldSetupQueues" />
+    </UnitTest>
+    <UnitTest name="DMS.Tests.DAL.Tests.DocumentControllerTests.DeleteAsync_NonExistingId_ReturnsNotFound" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="9e3fb1f3-16c0-410f-656f-2db518fa6b44">
+      <Execution id="acd2c2fe-2755-4da8-845f-01555e90b4a8" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="DMS.Tests.DAL.Tests.DocumentControllerTests" name="DeleteAsync_NonExistingId_ReturnsNotFound" />
+    </UnitTest>
+    <UnitTest name="DMS.Tests.DAL.Tests.DocumentRepositoryTests.GetAllDocumentsAsync_ReturnsAllDocuments" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="100a8810-a735-3dab-8b37-9ac82cc3a11d">
+      <Execution id="a15b3c28-ba95-4bae-b558-84445de7ae2a" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="DMS.Tests.DAL.Tests.DocumentRepositoryTests" name="GetAllDocumentsAsync_ReturnsAllDocuments" />
+    </UnitTest>
+    <UnitTest name="DMS.Tests.DAL.Tests.DocumentControllerTests.UpdateAsync_ExistingId_UpdatesAndReturnsNoContent" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="891f0a6f-d234-0d19-7745-a8fcc30b4d8f">
+      <Execution id="0d5330e9-4257-4c2d-ad25-de992c9c87ea" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="DMS.Tests.DAL.Tests.DocumentControllerTests" name="UpdateAsync_ExistingId_UpdatesAndReturnsNoContent" />
+    </UnitTest>
+    <UnitTest name="DMS.Tests.DAL.Tests.DocumentRepositoryTests.UpdateDocumentAsync_ValidDocument_UpdatesDocument" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="9838b7f8-29a9-f21c-8077-2735b8887ec0">
+      <Execution id="7a028b10-a7b8-4d29-bf87-dd437f368dd1" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="DMS.Tests.DAL.Tests.DocumentRepositoryTests" name="UpdateDocumentAsync_ValidDocument_UpdatesDocument" />
+    </UnitTest>
+    <UnitTest name="OcrProcessing.Tests.OcrWorkerTests.ReceivedEvent_ShouldLogError_OnInvalidMessage" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="14df28af-b544-fee0-1bd3-f40d70cf1eab">
+      <Execution id="c8c450a2-c621-4bc6-afb8-83053d85bbb0" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="OcrProcessing.Tests.OcrWorkerTests" name="ReceivedEvent_ShouldLogError_OnInvalidMessage" />
+    </UnitTest>
+    <UnitTest name="DMS.Tests.DAL.Tests.DocumentRepositoryTests.GetDocumentByIdAsync_NonExistingId_ReturnsNull" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="2eabd483-db2d-fe6e-b81f-edcbf7fdb5c3">
+      <Execution id="bdafcb2b-8baf-4761-bcd7-6efda005154a" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="DMS.Tests.DAL.Tests.DocumentRepositoryTests" name="GetDocumentByIdAsync_NonExistingId_ReturnsNull" />
+    </UnitTest>
+    <UnitTest name="DMS.Tests.DAL.Tests.DocumentControllerTests.UpdateAsync_NonExistingId_ReturnsNotFound" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="c522b74f-978a-52a9-8a65-d8529634f6e5">
+      <Execution id="95a4dea3-7625-4d26-9942-f27e79ea8f1e" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="DMS.Tests.DAL.Tests.DocumentControllerTests" name="UpdateAsync_NonExistingId_ReturnsNotFound" />
+    </UnitTest>
+    <UnitTest name="DMS.Tests.DAL.Tests.DocumentControllerTests.CreateAsync_ValidDocument_ReturnsOk" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="3780a6e0-910c-3a43-c1c4-8ebb0056ddc3">
+      <Execution id="9a054813-2bcd-4557-b159-4e4504840c5d" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="DMS.Tests.DAL.Tests.DocumentControllerTests" name="CreateAsync_ValidDocument_ReturnsOk" />
+    </UnitTest>
+    <UnitTest name="OcrProcessing.Tests.OcrWorkerTests.StartAsync_ShouldConsumeMessagesFromQueue" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="cab1eb2a-816f-1a2e-d518-f48a1b7c887e">
+      <Execution id="3c50d40d-b736-4476-aa51-48fbad0839da" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="OcrProcessing.Tests.OcrWorkerTests" name="StartAsync_ShouldConsumeMessagesFromQueue" />
+    </UnitTest>
+    <UnitTest name="DMS.Tests.DAL.Tests.DocumentRepositoryTests.AddDocumentAsync_ValidDocument_AddsDocument" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="42a4510b-d56c-7ec0-3205-3fd5d56f97ea">
+      <Execution id="d9bfcb51-c3c7-46cf-b4f1-1a31f471ea47" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="DMS.Tests.DAL.Tests.DocumentRepositoryTests" name="AddDocumentAsync_ValidDocument_AddsDocument" />
+    </UnitTest>
+    <UnitTest name="OcrProcessing.Tests.OcrWorkerTests.StopAsync_ShouldCloseConnectionAndChannel" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="a1983ff4-ee85-effe-8d1a-c9a8978be153">
+      <Execution id="dac65bec-d6b4-4558-8c98-d74d4a7b69fb" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="OcrProcessing.Tests.OcrWorkerTests" name="StopAsync_ShouldCloseConnectionAndChannel" />
+    </UnitTest>
+    <UnitTest name="DMS.Tests.DAL.Tests.DocumentControllerTests.GetByIdAsync_ExistingId_ReturnsDocument" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="f3abb41d-598b-86b1-ee9e-bf3264d05563">
+      <Execution id="cce2e9d4-5f32-4af8-866c-9c0018b1080f" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="DMS.Tests.DAL.Tests.DocumentControllerTests" name="GetByIdAsync_ExistingId_ReturnsDocument" />
+    </UnitTest>
+    <UnitTest name="DMS.Tests.DAL.Tests.DocumentRepositoryTests.DeleteDocumentAsync_NonExistingId_LogsWarning" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="379d6117-2117-a7da-7e7d-5073b3185a11">
+      <Execution id="3836adb2-751c-4cd8-9054-3e2d199cfb7d" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="DMS.Tests.DAL.Tests.DocumentRepositoryTests" name="DeleteDocumentAsync_NonExistingId_LogsWarning" />
+    </UnitTest>
+    <UnitTest name="OcrProcessing.Tests.OcrWorkerTests.ReceivedEvent_ShouldAckMessage_OnSuccessfulProcessing" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="d8b2c2e7-e130-b52f-2f24-2276c0b0793a">
+      <Execution id="e868a39d-7abb-4c82-9a9b-8052d93b034a" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="OcrProcessing.Tests.OcrWorkerTests" name="ReceivedEvent_ShouldAckMessage_OnSuccessfulProcessing" />
+    </UnitTest>
+    <UnitTest name="DMS.Tests.DAL.Tests.DocumentControllerTests.GetByIdAsync_NonExistingId_ReturnsNotFound" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="96d9d443-d78a-5013-0064-0700aec5d465">
+      <Execution id="a0486d79-f8a2-48a3-9140-478b33080441" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="DMS.Tests.DAL.Tests.DocumentControllerTests" name="GetByIdAsync_NonExistingId_ReturnsNotFound" />
+    </UnitTest>
+    <UnitTest name="DMS.Tests.DAL.Tests.DocumentControllerTests.DeleteAsync_ExistingId_DeletesAndReturnsNoContent" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="f23ec38a-d656-e140-0103-a68117be0ba8">
+      <Execution id="a9fde469-3707-4f8c-aaa3-e288165e31de" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="DMS.Tests.DAL.Tests.DocumentControllerTests" name="DeleteAsync_ExistingId_DeletesAndReturnsNoContent" />
+    </UnitTest>
+    <UnitTest name="DMS.Tests.DAL.Tests.DocumentControllerTests.GetAsync_ReturnsAllDocuments" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="ba99a799-d7ff-39e6-6c75-18a8c8103583">
+      <Execution id="f10ed46b-63c4-4f0c-896b-20917c2d3c6e" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="DMS.Tests.DAL.Tests.DocumentControllerTests" name="GetAsync_ReturnsAllDocuments" />
+    </UnitTest>
+    <UnitTest name="OcrProcessing.Tests.OcrWorkerTests.PerformOcrAsync_ReturnsExtractedTextFromPdf" storage="c:\users\melih\desktop\swkom\dms\dms.tests\bin\debug\net8.0\dms.tests.dll" id="ed775d5b-a446-722a-c70b-b2f328f1f468">
+      <Execution id="913e27d8-9267-4434-884f-46ad42fc0a0c" />
+      <TestMethod codeBase="C:\Users\melih\Desktop\SWKOM\DMS\DMS.Tests\bin\Debug\net8.0\DMS.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="OcrProcessing.Tests.OcrWorkerTests" name="PerformOcrAsync_ReturnsExtractedTextFromPdf" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="100a8810-a735-3dab-8b37-9ac82cc3a11d" executionId="a15b3c28-ba95-4bae-b558-84445de7ae2a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a13993a8-9272-3364-07c1-b94586b86fda" executionId="7a187b5f-9673-4f1d-b6c9-31a4c679c0c5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="42a4510b-d56c-7ec0-3205-3fd5d56f97ea" executionId="d9bfcb51-c3c7-46cf-b4f1-1a31f471ea47" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c522b74f-978a-52a9-8a65-d8529634f6e5" executionId="95a4dea3-7625-4d26-9942-f27e79ea8f1e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2eabd483-db2d-fe6e-b81f-edcbf7fdb5c3" executionId="bdafcb2b-8baf-4761-bcd7-6efda005154a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="14df28af-b544-fee0-1bd3-f40d70cf1eab" executionId="c8c450a2-c621-4bc6-afb8-83053d85bbb0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f3abb41d-598b-86b1-ee9e-bf3264d05563" executionId="cce2e9d4-5f32-4af8-866c-9c0018b1080f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d8b2c2e7-e130-b52f-2f24-2276c0b0793a" executionId="e868a39d-7abb-4c82-9a9b-8052d93b034a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9838b7f8-29a9-f21c-8077-2735b8887ec0" executionId="7a028b10-a7b8-4d29-bf87-dd437f368dd1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3780a6e0-910c-3a43-c1c4-8ebb0056ddc3" executionId="9a054813-2bcd-4557-b159-4e4504840c5d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f54e2825-2ddb-ab75-b6f1-12adafb18105" executionId="97771ea4-9f25-4a8e-9db3-ae1080ec2cd8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1674d145-8b2c-6f0b-7b31-041478f23d71" executionId="a1776b0a-9405-4a0e-bd2b-67c3d5e19df2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a1983ff4-ee85-effe-8d1a-c9a8978be153" executionId="dac65bec-d6b4-4558-8c98-d74d4a7b69fb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="379d6117-2117-a7da-7e7d-5073b3185a11" executionId="3836adb2-751c-4cd8-9054-3e2d199cfb7d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9e3fb1f3-16c0-410f-656f-2db518fa6b44" executionId="acd2c2fe-2755-4da8-845f-01555e90b4a8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cab1eb2a-816f-1a2e-d518-f48a1b7c887e" executionId="3c50d40d-b736-4476-aa51-48fbad0839da" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f23ec38a-d656-e140-0103-a68117be0ba8" executionId="a9fde469-3707-4f8c-aaa3-e288165e31de" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="891f0a6f-d234-0d19-7745-a8fcc30b4d8f" executionId="0d5330e9-4257-4c2d-ad25-de992c9c87ea" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ba99a799-d7ff-39e6-6c75-18a8c8103583" executionId="f10ed46b-63c4-4f0c-896b-20917c2d3c6e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ed775d5b-a446-722a-c70b-b2f328f1f468" executionId="913e27d8-9267-4434-884f-46ad42fc0a0c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="96d9d443-d78a-5013-0064-0700aec5d465" executionId="a0486d79-f8a2-48a3-9140-478b33080441" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="21" executed="21" passed="21" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.8)&#xD;
+[xUnit.net 00:00:00.15]   Discovering: DMS.Tests&#xD;
+[xUnit.net 00:00:00.17]   Discovered:  DMS.Tests&#xD;
+[xUnit.net 00:00:00.17]   Starting:    DMS.Tests&#xD;
+[xUnit.net 00:00:00.71]   Finished:    DMS.Tests&#xD;
+</StdOut>
+    </Output>
+    <CollectorDataEntries>
+      <Collector agentName="SOLT-DESKTOP" uri="datacollector://microsoft/CoverletCodeCoverage/1.0" collectorDisplayName="XPlat code coverage">
+        <UriAttachments>
+          <UriAttachment>
+            <A href="SOLT-DESKTOP\coverage.cobertura.xml"></A>
+          </UriAttachment>
+        </UriAttachments>
+      </Collector>
+    </CollectorDataEntries>
+  </ResultSummary>
+</TestRun>

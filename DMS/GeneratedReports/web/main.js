@@ -218,16 +218,98 @@ for (i = 0, l = charts.length; i < l; i++) {
 }
 
 var assemblies = [
+  {
+    "name": "DAL",
+    "classes": [
+      { "name": "DAL.Context.DocumentContext", "rp": "DAL_DocumentContext.html", "cl": 15, "ucl": 3, "cal": 18, "tl": 36, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "DAL.Controllers.DocumentController", "rp": "DAL_DocumentController.html", "cl": 37, "ucl": 0, "cal": 37, "tl": 74, "cb": 6, "tb": 6, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "DAL.Entities.Document", "rp": "DAL_Document.html", "cl": 5, "ucl": 1, "cal": 6, "tl": 18, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "DAL.Migrations.AddFilePathToDocument", "rp": "DAL_AddFilePathToDocument.html", "cl": 0, "ucl": 50, "cal": 50, "tl": 91, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "DAL.Migrations.ConfigureDocumentEntity", "rp": "DAL_ConfigureDocumentEntity.html", "cl": 0, "ucl": 75, "cal": 75, "tl": 119, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "DAL.Migrations.DocumentContextModelSnapshot", "rp": "DAL_DocumentContextModelSnapshot.html", "cl": 0, "ucl": 38, "cal": 38, "tl": 60, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "DAL.Migrations.RecreateDocumentsTable", "rp": "DAL_RecreateDocumentsTable.html", "cl": 0, "ucl": 52, "cal": 52, "tl": 95, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "DAL.Repositories.DocumentRepository", "rp": "DAL_DocumentRepository.html", "cl": 56, "ucl": 20, "cal": 76, "tl": 115, "cb": 4, "tb": 4, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "Program", "rp": "DAL_Program.html", "cl": 0, "ucl": 21, "cal": 21, "tl": 44, "cb": 0, "tb": 4, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+    ]},
+  {
+    "name": "MinioService",
+    "classes": [
+      { "name": "MinioService.Controller.FileController", "rp": "MinioService_FileController.html", "cl": 0, "ucl": 58, "cal": 58, "tl": 103, "cb": 0, "tb": 8, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "Program", "rp": "MinioService_Program.html", "cl": 0, "ucl": 29, "cal": 29, "tl": 44, "cb": 0, "tb": 4, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "WeatherForecast", "rp": "MinioService_WeatherForecast.html", "cl": 0, "ucl": 2, "cal": 2, "tl": 44, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+    ]},
+  {
+    "name": "OcrProcessing",
+    "classes": [
+      { "name": "OcrProcessing.OcrWorker", "rp": "OcrProcessing_OcrWorker.html", "cl": 88, "ucl": 77, "cal": 165, "tl": 231, "cb": 5, "tb": 14, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OcrProcessing.Program", "rp": "OcrProcessing_Program.html", "cl": 0, "ucl": 14, "cal": 14, "tl": 27, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+    ]},
+  {
+    "name": "REST_API",
+    "classes": [
+      { "name": "Program", "rp": "REST_API_Program.html", "cl": 0, "ucl": 46, "cal": 46, "tl": 92, "cb": 0, "tb": 2, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "REST_API.Controllers.DocumentController", "rp": "REST_API_DocumentController.html", "cl": 0, "ucl": 114, "cal": 114, "tl": 203, "cb": 0, "tb": 38, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "REST_API.Controllers.HelloWorldController", "rp": "REST_API_HelloWorldController.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 16, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "REST_API.Controllers.RootController", "rp": "REST_API_RootController.html", "cl": 0, "ucl": 4, "cal": 4, "tl": 16, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "REST_API.DTOs.DocumentDTO", "rp": "REST_API_DocumentDTO.html", "cl": 0, "ucl": 6, "cal": 6, "tl": 14, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "REST_API.DTOs.DocumentDTOValidator", "rp": "REST_API_DocumentDTOValidator.html", "cl": 0, "ucl": 6, "cal": 6, "tl": 14, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "REST_API.MappingProfiles.DocumentProfile", "rp": "REST_API_DocumentProfile.html", "cl": 0, "ucl": 5, "cal": 5, "tl": 15, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "REST_API.Services.MessageQueueService", "rp": "REST_API_MessageQueueService.html", "cl": 0, "ucl": 28, "cal": 28, "tl": 46, "cb": 0, "tb": 4, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "REST_API.Services.RabbitMqListenerService", "rp": "REST_API_RabbitMqListenerService.html", "cl": 0, "ucl": 135, "cal": 135, "tl": 170, "cb": 0, "tb": 10, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+    ]},
+  {
+    "name": "WebUI",
+    "classes": [
+      { "name": "Program", "rp": "WebUI_Program.html", "cl": 0, "ucl": 7, "cal": 7, "tl": 16, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+    ]},
 ];
 
-var metrics = [];
+var metrics = [{ "name": "Crap Score", "abbreviation": "crp", "explanationUrl": "https://googletesting.blogspot.de/2011/02/this-code-is-crap.html" }, { "name": "Cyclomatic complexity", "abbreviation": "cc", "explanationUrl": "https://en.wikipedia.org/wiki/Cyclomatic_complexity" }, { "name": "Line coverage", "abbreviation": "cov", "explanationUrl": "https://en.wikipedia.org/wiki/Code_coverage" }, { "name": "Branch coverage", "abbreviation": "bcov", "explanationUrl": "https://en.wikipedia.org/wiki/Code_coverage" }];
 
 var historicCoverageExecutionTimes = [];
 
 var riskHotspotMetrics = [
+      { "name": "Crap Score", "explanationUrl": "https://googletesting.blogspot.de/2011/02/this-code-is-crap.html" },
+      { "name": "Cyclomatic complexity", "explanationUrl": "https://en.wikipedia.org/wiki/Cyclomatic_complexity" },
 ];
 
 var riskHotspots = [
+  {
+    "assembly": "REST_API", "class": "REST_API.Controllers.DocumentController", "reportPath": "REST_API_DocumentController.html", "methodName": "UploadFile()", "methodShortName": "UploadFile()", "fileIndex": 0, "line": 131,
+    "metrics": [
+      { "value": 272, "exceeded": true },
+      { "value": 16, "exceeded": true },
+    ]},
+  {
+    "assembly": "REST_API", "class": "REST_API.Controllers.DocumentController", "reportPath": "REST_API_DocumentController.html", "methodName": "Create()", "methodShortName": "Create()", "fileIndex": 0, "line": 74,
+    "metrics": [
+      { "value": 72, "exceeded": true },
+      { "value": 8, "exceeded": false },
+    ]},
+  {
+    "assembly": "MinioService", "class": "MinioService.Controller.FileController", "reportPath": "MinioService_FileController.html", "methodName": "UploadFile()", "methodShortName": "UploadFile()", "fileIndex": 0, "line": 42,
+    "metrics": [
+      { "value": 42, "exceeded": true },
+      { "value": 6, "exceeded": false },
+    ]},
+  {
+    "assembly": "OcrProcessing", "class": "OcrProcessing.OcrWorker", "reportPath": "OcrProcessing_OcrWorker.html", "methodName": "ConnectToRabbitMQ()", "methodShortName": "ConnectToRabbitMQ()", "fileIndex": 0, "line": 43,
+    "metrics": [
+      { "value": 42, "exceeded": true },
+      { "value": 6, "exceeded": false },
+    ]},
+  {
+    "assembly": "REST_API", "class": "REST_API.Controllers.DocumentController", "reportPath": "REST_API_DocumentController.html", "methodName": "Update()", "methodShortName": "Update()", "fileIndex": 0, "line": 106,
+    "metrics": [
+      { "value": 42, "exceeded": true },
+      { "value": 6, "exceeded": false },
+    ]},
+  {
+    "assembly": "REST_API", "class": "REST_API.Services.RabbitMqListenerService", "reportPath": "REST_API_RabbitMqListenerService.html", "methodName": "ConnectToRabbitMQ()", "methodShortName": "ConnectToRabbitMQ()", "fileIndex": 0, "line": 32,
+    "metrics": [
+      { "value": 42, "exceeded": true },
+      { "value": 6, "exceeded": false },
+    ]},
 ];
 
 var branchCoverageAvailable = true;

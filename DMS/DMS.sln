@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAL", "DAL\DAL.csproj", "{5
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DMS.Tests", "DMS.Tests\DMS.Tests.csproj", "{D936E730-78EE-4F5D-BF5C-24AC2CD9E3B3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OcrWorker", "OcrWorker\OcrWorker.csproj", "{EE5D860E-D7B0-41FA-831F-3FE4BE9F06C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OcrProcessing", "OcrProcessing\OcrProcessing.csproj", "{EE5D860E-D7B0-41FA-831F-3FE4BE9F06C1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinioService", "MinIOService\MinioService.csproj", "{460FA9A3-9556-4D23-8FFA-7BABF758717D}"
 EndProject

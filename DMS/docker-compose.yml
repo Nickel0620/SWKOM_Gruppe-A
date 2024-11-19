@@ -83,7 +83,7 @@ services:
     image: ocr_worker_image
     build:
       context: . 
-      dockerfile: ./OcrWorker/Dockerfile
+      dockerfile: ./OcrProcessing/Dockerfile
     depends_on:
       - rabbitmq
     environment:
@@ -110,3 +110,4 @@ services:
 
 volumes:
   db-data:
+  minio-data:  
