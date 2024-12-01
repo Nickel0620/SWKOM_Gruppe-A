@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DAL.Entities;
 using REST_API.Services;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace REST_API.Controllers
 {
@@ -17,16 +18,26 @@ namespace REST_API.Controllers
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IMapper _mapper;
         private readonly IMessageQueueService _messageQueueService;
+        private readonly FileController _fileController;
+        private readonly ILogger<DocumentController> _logger; 
 
-        public DocumentController(IHttpClientFactory httpClientFactory, IMapper mapper, IMessageQueueService messageQueueService)
+        public DocumentController(
+            IHttpClientFactory httpClientFactory,
+            IMapper mapper,
+            IMessageQueueService messageQueueService,
+            FileController fileController,
+            ILogger<DocumentController> logger) 
         {
             _httpClientFactory = httpClientFactory;
             _mapper = mapper;
             _messageQueueService = messageQueueService;
+            _fileController = fileController;
+            _logger = logger; 
         }
 
         private IActionResult CreateErrorResponse(string message, int statusCode)
         {
+            _logger.LogError("Error response: {Message}, StatusCode: {StatusCode}", message, statusCode); 
             return StatusCode(statusCode, new { error = message });
         }
 
@@ -69,10 +80,9 @@ namespace REST_API.Controllers
         }
 
         [HttpPost]
-        [HttpPost]
-        public async Task<IActionResult> Create(DocumentDTO documentDto)
+        public async Task<IActionResult> Create([FromBody] DocumentDTO documentDto)
         {
-            Console.WriteLine($"Received DocumentDTO: {JsonSerializer.Serialize(documentDto)}");
+            _logger.LogInformation("Received DocumentDTO: {DocumentDTO}", JsonSerializer.Serialize(documentDto));
 
             if (!ModelState.IsValid)
             {
@@ -86,15 +96,26 @@ namespace REST_API.Controllers
 
             if (response.IsSuccessStatusCode)
             {
-                // Parse the created document from the DAL response
                 var createdDocument = await response.Content.ReadFromJsonAsync<Document>();
-
                 if (createdDocument == null || createdDocument.Id <= 0)
                 {
                     return StatusCode(500, new { error = "Error retrieving created document from DAL." });
                 }
 
-                // Return the created document with the generated ID
+                // Send the FilePath to RabbitMQ for processing
+                if (!string.IsNullOrEmpty(documentDto.FilePath))
+                {
+                    try
+                    {
+                        _messageQueueService.SendToQueue($"{createdDocument.Id}|{documentDto.FilePath}");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error sending message to RabbitMQ for FilePath: {FilePath}", documentDto.FilePath);
+                        return StatusCode(500, new { error = $"Error sending the message to RabbitMQ: {ex.Message}" });
+                    }
+                }
+
                 return CreatedAtAction(nameof(GetById), new { id = createdDocument.Id }, createdDocument);
             }
 
@@ -126,78 +147,44 @@ namespace REST_API.Controllers
             return CreateErrorResponse("Error updating document in DAL", (int)response.StatusCode);
         }
 
-        [HttpPut("{id}/upload")]
-        public async Task<IActionResult> UploadFile(int id, IFormFile? documentFile)
-        {
-            if (documentFile == null || documentFile.Length == 0)
-            {
-                return BadRequest(new { error = "No file uploaded." });
-            }
-            if (!documentFile.FileName.EndsWith(".pdf"))
-            {
-                return BadRequest(new { error = "Only PDF files are allowed." });
-            }
-
-            var client = _httpClientFactory.CreateClient("DAL");
-            var response = await client.GetAsync($"/api/document/{id}");
-            if (!response.IsSuccessStatusCode)
-            {
-                return NotFound(new { error = $"Error fetching document with ID {id}." });
-            }
-
-            var document = await response.Content.ReadFromJsonAsync<Document>();
-            if (document == null)
-            {
-                return NotFound(new { error = $"Document with ID {id} not found." });
-            }
-
-            var documentDto = _mapper.Map<DocumentDTO>(document);
-            var validator = new DocumentDTOValidator();
-            var validationResult = await validator.ValidateAsync(documentDto);
-
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(new { errors = validationResult.Errors.Select(e => e.ErrorMessage) });
-            }
-
-            var updatedDocument = _mapper.Map<Document>(documentDto);
-            var updateResponse = await client.PutAsJsonAsync($"/api/document/{id}", updatedDocument);
-            if (!updateResponse.IsSuccessStatusCode)
-            {
-                return CreateErrorResponse("Error updating document in DAL", (int)updateResponse.StatusCode);
-            }
-
-            var filePath = Path.Combine("/app/uploads", documentFile.FileName);
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-            await using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await documentFile.CopyToAsync(stream);
-            }
-
-            try
-            {
-                _messageQueueService.SendToQueue($"{id}|{filePath}");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = $"Error sending the message to RabbitMQ: {ex.Message}" });
-            }
-
-            return Ok(new { message = $"File {documentFile.FileName} for task {id} saved successfully." });
-        }
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var client = _httpClientFactory.CreateClient("DAL");
-            var response = await client.DeleteAsync($"/api/document/{id}");
 
-            if (response.IsSuccessStatusCode)
+            // Fetch the document to get its filePath before deletion
+            var response = await client.GetAsync($"/api/document/{id}");
+
+            if (!response.IsSuccessStatusCode)
             {
-                return NoContent();
+                return CreateErrorResponse("Error retrieving document from DAL", (int)response.StatusCode);
             }
 
-            return CreateErrorResponse("Error deleting document from DAL", (int)response.StatusCode);
+            var document = await response.Content.ReadFromJsonAsync<Document>();
+            if (document == null || string.IsNullOrEmpty(document.FilePath))
+            {
+                return NotFound(new { error = "Document not found or no associated file path." });
+            }
+
+            // Delete the document in DAL
+            response = await client.DeleteAsync($"/api/document/{id}");
+            if (!response.IsSuccessStatusCode)
+            {
+                return CreateErrorResponse("Error deleting document from DAL", (int)response.StatusCode);
+            }
+
+            // Delete the file from MinIO
+            try
+            {
+                await _fileController.DeleteFile(document.FilePath);
+                _logger.LogInformation("Successfully deleted file {FilePath} from MinIO.", document.FilePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting file {FilePath} from MinIO.", document.FilePath);
+            }
+
+            return NoContent();
         }
     }
 }

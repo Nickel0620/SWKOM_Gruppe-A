@@ -33,7 +33,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DAL\DAL.csproj" />
-    <ProjectReference Include="..\MinIOService\MinioService.csproj" />
     <ProjectReference Include="..\OcrProcessing\OcrProcessing.csproj" />
     <ProjectReference Include="..\REST_API\REST_API.csproj" />
     <ProjectReference Include="..\WebUI\WebUI.csproj" />

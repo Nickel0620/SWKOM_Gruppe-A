@@ -96,9 +96,6 @@ services:
   minio:
     image: minio/minio
     container_name: minio
-    build:
-      context: . 
-      dockerfile: ./MinioService/Dockerfile
     ports:
       - "9000:9000"
       - "9001:9001"

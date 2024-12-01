@@ -14,6 +14,7 @@ using System.Linq;
 using DAL.Entities;
 using Moq.Protected;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.Extensions.Logging;
 
 namespace DMS.Tests.REST_API.Tests
 {
@@ -22,6 +23,7 @@ namespace DMS.Tests.REST_API.Tests
         private readonly Mock<IHttpClientFactory> _httpClientFactoryMock;
         private readonly Mock<IMapper> _mapperMock;
         private readonly Mock<IMessageQueueService> _messageQueueServiceMock;
+        private readonly Mock<FileController> _fileControllerMock;
         private readonly DocumentController _controller;
 
         public DocumentControllerTests()
@@ -29,7 +31,14 @@ namespace DMS.Tests.REST_API.Tests
             _httpClientFactoryMock = new Mock<IHttpClientFactory>();
             _mapperMock = new Mock<IMapper>();
             _messageQueueServiceMock = new Mock<IMessageQueueService>();
-            _controller = new DocumentController(_httpClientFactoryMock.Object, _mapperMock.Object, _messageQueueServiceMock.Object);
+            _fileControllerMock = new Mock<FileController>(MockBehavior.Strict, null);
+
+            _controller = new DocumentController(
+                _httpClientFactoryMock.Object,
+                _mapperMock.Object,
+                _messageQueueServiceMock.Object,
+                _fileControllerMock.Object,
+                Mock.Of<ILogger<DocumentController>>()); 
         }
 
         [Fact]

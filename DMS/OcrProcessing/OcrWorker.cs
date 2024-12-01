@@ -1,13 +1,12 @@
-﻿using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using System.Text;
-using System.Text.Json;
-using System.IO;
-using System.Diagnostics;
-using ImageMagick;
-using System.Threading.Tasks;
+﻿using ImageMagick;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Minio;
+using Minio.DataModel.Args;
+using RabbitMQ.Client.Events;
+using RabbitMQ.Client;
+using System.Diagnostics;
+using System.Text;
 
 namespace OcrProcessing
 {
@@ -18,10 +17,18 @@ namespace OcrProcessing
         private readonly ILogger<OcrWorker> _logger;
         private const string FileQueueName = "file_queue";
         private const string OcrResultQueueName = "ocr_result_queue";
+        private const string BucketName = "uploads"; // MinIO bucket name
+        private readonly IMinioClient _minioClient;
 
         public OcrWorker(ILogger<OcrWorker> logger)
         {
             _logger = logger;
+            _minioClient = new MinioClient()
+                .WithEndpoint("minio", 9000)
+                .WithCredentials("minioadmin", "minioadmin")
+                .WithSSL(false)
+                .Build();
+
             ConnectToRabbitMQ();
         }
 
@@ -30,6 +37,11 @@ namespace OcrProcessing
             _logger = logger;
             _connection = connection;
             _channel = channel;
+            _minioClient = new MinioClient()
+                .WithEndpoint("minio", 9000)
+                .WithCredentials("minioadmin", "minioadmin")
+                .WithSSL(false)
+                .Build();
 
             SetupRabbitMQ();
         }
@@ -76,7 +88,6 @@ namespace OcrProcessing
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-
             // Set up consumer for the file_queue
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += async (model, ea) =>
@@ -88,30 +99,37 @@ namespace OcrProcessing
                 if (parts.Length == 2)
                 {
                     var id = parts[0];
-                    var filePath = parts[1];
+                    var fileName = parts[1];
 
-                    _logger.LogInformation("Received ID: {Id}, FilePath: {FilePath}", id, filePath);
+                    _logger.LogInformation("Received ID: {Id}, FileName: {FileName}", id, fileName);
 
-                    // Ensure the file exists
-                    if (!File.Exists(filePath))
+                    try
                     {
-                        _logger.LogError("File not found: {FilePath}", filePath);
-                        _channel.BasicAck(ea.DeliveryTag, false);
-                        return;
+                        // Download the file from MinIO
+                        var localFilePath = await DownloadFileFromMinIOAsync(fileName);
+
+                        // Start OCR processing
+                        var extractedText = await PerformOcrAsync(localFilePath);
+
+                        if (!string.IsNullOrEmpty(extractedText))
+                        {
+                            // Send result back to ocr_result_queue
+                            var resultMessage = $"{id}|{extractedText.Replace("\n", " ").Replace("\r", "")}";
+                            var resultBody = Encoding.UTF8.GetBytes(resultMessage);
+                            _channel.BasicPublish(exchange: "", routingKey: OcrResultQueueName, basicProperties: null, body: resultBody);
+
+                            _logger.LogInformation("Sent OCR result for ID: {Id} to queue: {QueueName}", id, OcrResultQueueName);
+                        }
+
+                        // Clean up local file
+                        if (File.Exists(localFilePath))
+                        {
+                            File.Delete(localFilePath);
+                        }
                     }
-
-                    // Start OCR processing
-                    var extractedText = await PerformOcrAsync(filePath);
-
-                    if (!string.IsNullOrEmpty(extractedText))
+                    catch (Exception ex)
                     {
-                        // Send result back to ocr_result_queue
-                        var resultMessage = $"{id}|{extractedText.Replace("\n", " ").Replace("\r", "")}";
-                        var resultBody = Encoding.UTF8.GetBytes(resultMessage);
-                        _channel.BasicPublish(exchange: "", routingKey: OcrResultQueueName, basicProperties: null, body: resultBody);
-
-
-                        _logger.LogInformation("Sent OCR result for ID: {Id} to queue: {QueueName}", id, OcrResultQueueName);
+                        _logger.LogError(ex, "Error processing file: {FileName}", fileName);
                     }
 
                     _channel.BasicAck(ea.DeliveryTag, false);
@@ -134,6 +152,29 @@ namespace OcrProcessing
             _channel.Close();
             _connection.Close();
             return Task.CompletedTask;
+        }
+
+        private async Task<string> DownloadFileFromMinIOAsync(string fileName)
+        {
+            var localFilePath = Path.Combine(Path.GetTempPath(), fileName);
+
+            try
+            {
+                using var fileStream = new FileStream(localFilePath, FileMode.Create, FileAccess.Write);
+                await _minioClient.GetObjectAsync(new GetObjectArgs()
+                    .WithBucket(BucketName)
+                    .WithObject(fileName)
+                    .WithCallbackStream(stream => stream.CopyTo(fileStream)));
+
+                _logger.LogInformation("Downloaded file {FileName} to {LocalFilePath}", fileName, localFilePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error downloading file from MinIO: {FileName}", fileName);
+                throw;
+            }
+
+            return localFilePath;
         }
 
         public async Task<string> PerformOcrAsync(string filePath)
@@ -175,40 +216,6 @@ namespace OcrProcessing
                                 stringBuilder.Append(result);
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            // If the process fails, log the error and retry with a hardcoded path to tesseract.exe
-                            // for unit testing purposes
-                            _logger.LogError(ex, "Failed to start Tesseract using default path. Trying hardcoded path.");
-
-                            var hardcodedPsi = new ProcessStartInfo
-                            {
-                                FileName = @"C:\Program Files\Tesseract-OCR\tesseract.exe", // Hardcoded fallback path
-                                Arguments = $"{tempPngFile} stdout -l eng",
-                                RedirectStandardOutput = true,
-                                UseShellExecute = false,
-                                CreateNoWindow = true
-                            };
-
-                            try
-                            {
-                                using (var process = Process.Start(hardcodedPsi))
-                                {
-                                    if (process == null)
-                                    {
-                                        throw new InvalidOperationException("Failed to start Tesseract process with hardcoded path.");
-                                    }
-
-                                    string result = await process.StandardOutput.ReadToEndAsync();
-                                    stringBuilder.Append(result);
-                                }
-                            }
-                            catch (Exception fallbackEx)
-                            {
-                                _logger.LogError(fallbackEx, "Failed to start Tesseract using hardcoded path.");
-                                throw; // Re-throw the exception to signal failure
-                            }
-                        }
                         finally
                         {
                             if (File.Exists(tempPngFile))
@@ -217,7 +224,6 @@ namespace OcrProcessing
                             }
                         }
                     }
-
                 }
             }
             catch (Exception ex)

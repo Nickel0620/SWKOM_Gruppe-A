@@ -8,6 +8,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using REST_API.Services;
 using System.Diagnostics.CodeAnalysis;
+using REST_API.Controllers;
 
 namespace REST_API
 {
@@ -48,7 +49,7 @@ namespace REST_API
             // Register the repository from DAL
             builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 
-
+            builder.Services.AddScoped<FileController>();
 
             builder.Services.AddHttpClient("DAL", client =>
             {

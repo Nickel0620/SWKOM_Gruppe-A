@@ -98,13 +98,11 @@ async function addDocument() {
     const titleInput = document.getElementById('docTitle');
     const fileInput = document.getElementById('docFile');
 
-    // Validate title input
     if (!titleInput || titleInput.value.trim() === '') {
         showAlert('Document Title is required.', 'danger');
         return;
     }
 
-    // Validate file input
     if (!fileInput || !fileInput.files[0]) {
         showAlert('Please select a file to upload.', 'danger');
         return;
@@ -114,12 +112,11 @@ async function addDocument() {
     const file = fileInput.files[0];
 
     try {
-        // Step 1: Create the document
-        const createdDocument = await createDocument(title);
-        const documentId = createdDocument.id;
+        // Step 1: Upload the file to MinIO using FileController
+        const fileKey = await uploadFileToMinio(file);
 
-        // Step 2: Upload the file for the created document
-        await uploadFile(documentId, file);
+        // Step 2: Send the document metadata along with the FileKey
+        await createDocument(title, fileKey);
 
         titleInput.value = '';
         fileInput.value = '';
@@ -130,15 +127,32 @@ async function addDocument() {
     }
 }
 
-async function createDocument(title) {
-    const documentDto = { title };
+async function uploadFileToMinio(file) {
+    const formData = new FormData();
+    formData.append('file', file);
 
+    const response = await fetch(`${apiUrl}/api/file/upload`, {
+        method: 'POST',
+        body: formData,
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error uploading file to MinIO:', errorData);
+        throw new Error(errorData.message || 'Failed to upload file');
+    }
+
+    const { fileName } = await response.json(); // Get the file key from the response
+    return fileName;
+}
+
+async function createDocument(title, fileKey) {
     const response = await fetch(`${apiUrl}/document`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(documentDto),
+        body: JSON.stringify({ title, filePath: fileKey }), // Pass the FileKey in the payload
     });
 
     if (!response.ok) {
@@ -146,27 +160,8 @@ async function createDocument(title) {
         console.error('Error creating document:', errorData);
         throw new Error(errorData.message || 'Failed to create document');
     }
-
-    const createdDocument = await response.json();
-    console.log('Created Document:', createdDocument); // Debug log
-    return createdDocument;
 }
 
-async function uploadFile(documentId, file) {
-    const formData = new FormData();
-    formData.append('documentFile', file);
-
-    const response = await fetch(`${apiUrl}/document/${documentId}/upload`, {
-        method: 'PUT',
-        body: formData,
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error uploading file:', errorData);
-        throw new Error(errorData.message || 'Failed to upload file');
-    }
-}
 
 async function deleteDocument(id) {
     try {
