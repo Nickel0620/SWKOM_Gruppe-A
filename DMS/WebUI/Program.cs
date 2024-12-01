@@ -1,3 +1,5 @@
+using Microsoft.Extensions.FileProviders;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Füge statische Dateien hinzu
@@ -7,6 +9,11 @@ var app = builder.Build();
 
 // Aktiviere die Verwendung von statischen Dateien
 app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
+    RequestPath = "/static"
+});
 
 // Aktiviere den Routing-Support
 app.UseRouting();

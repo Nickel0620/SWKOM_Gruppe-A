@@ -1,4 +1,4 @@
-@MinioService_HostAddress = http://localhost:5167
+@MinioService_HostAddress = http://localhost:5181
 
 GET {{MinioService_HostAddress}}/weatherforecast/
 Accept: application/json
