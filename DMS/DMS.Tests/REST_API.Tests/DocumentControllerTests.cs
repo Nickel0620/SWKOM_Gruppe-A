@@ -190,31 +190,6 @@ namespace DMS.Tests.REST_API.Tests
             // Assert
             Assert.IsType<NoContentResult>(result);
         }
-
-        [Fact]
-        public async Task Delete_ValidId_ReturnsNoContent()
-        {
-            // Arrange
-            var mockClient = new Mock<HttpMessageHandler>();
-            mockClient.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.NoContent
-                });
-
-            var client = new HttpClient(mockClient.Object)
-            {
-                BaseAddress = new Uri("http://localhost")
-            };
-            _httpClientFactoryMock.Setup(f => f.CreateClient("DAL")).Returns(client);
-
-            // Act
-            var result = await _controller.Delete(1);
-
-            // Assert
-            Assert.IsType<NoContentResult>(result);
-        }
     }
 
 }

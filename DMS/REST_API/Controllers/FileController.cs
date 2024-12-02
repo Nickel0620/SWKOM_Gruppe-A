@@ -9,7 +9,7 @@ namespace REST_API.Controllers
     [Route("api/[controller]")]
     public class FileController : ControllerBase
     {
-        private readonly IMinioClient _minioClient;
+        public IMinioClient _minioClient;
         private readonly ILogger<FileController> _logger;
         private const string BucketName = "uploads";
 
