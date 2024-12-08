@@ -103,7 +103,8 @@ namespace REST_API.Services
                             return;
                         }
 
-                        var client = _httpClientFactory.CreateClient("DAL");
+                        var dalClient = _httpClientFactory.CreateClient("DAL");
+                        var restClient = _httpClientFactory.CreateClient("REST");
                         bool documentUpdated = false;
 
                         await Task.Delay(500); // Initial delay before retrying
@@ -112,7 +113,7 @@ namespace REST_API.Services
                         {
                             try
                             {
-                                var response = await client.GetAsync($"/api/document/{id}");
+                                var response = await dalClient.GetAsync($"/api/document/{id}");
                                 _logger.LogInformation("Attempt {Attempt}: Response Status Code for document {Id}: {StatusCode}", attempt, id, response.StatusCode);
 
                                 if (response.IsSuccessStatusCode)
@@ -123,11 +124,23 @@ namespace REST_API.Services
                                         _logger.LogInformation("Document {Id} retrieved successfully on attempt {Attempt}.", id, attempt);
                                         document.OcrText = extractedText;
 
-                                        var updateResponse = await client.PutAsJsonAsync($"/api/document/{id}", document);
+                                        var updateResponse = await dalClient.PutAsJsonAsync($"/api/document/{id}", document);
                                         if (updateResponse.IsSuccessStatusCode)
                                         {
                                             _logger.LogInformation("OCR text for Document {Id} updated successfully.", id);
                                             documentUpdated = true;
+
+                                            // Notify REST API to update the document in Elasticsearch
+                                            var restResponse = await restClient.PutAsJsonAsync($"/document/{id}", document);
+                                            if (restResponse.IsSuccessStatusCode)
+                                            {
+                                                _logger.LogInformation("Document {Id} updated in Elasticsearch successfully.", id);
+                                            }
+                                            else
+                                            {
+                                                _logger.LogError("Error updating document {Id} in Elasticsearch. Response: {StatusCode}", id, restResponse.StatusCode);
+                                            }
+
                                             break;
                                         }
                                         else

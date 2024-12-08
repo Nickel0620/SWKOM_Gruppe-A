@@ -8,6 +8,7 @@ using DAL.Entities;
 using REST_API.Services;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using Elastic.Clients.Elasticsearch;
 
 namespace REST_API.Controllers
 {
@@ -19,6 +20,7 @@ namespace REST_API.Controllers
         private readonly IMapper _mapper;
         private readonly IMessageQueueService _messageQueueService;
         private readonly FileController _fileController;
+        private readonly ElasticsearchClient _elasticClient;
         private readonly ILogger<DocumentController> _logger; 
 
         public DocumentController(
@@ -26,12 +28,14 @@ namespace REST_API.Controllers
             IMapper mapper,
             IMessageQueueService messageQueueService,
             FileController fileController,
+            ElasticsearchClient elasticClient,
             ILogger<DocumentController> logger) 
         {
             _httpClientFactory = httpClientFactory;
             _mapper = mapper;
             _messageQueueService = messageQueueService;
             _fileController = fileController;
+            _elasticClient = elasticClient;
             _logger = logger; 
         }
 
@@ -116,6 +120,36 @@ namespace REST_API.Controllers
                     }
                 }
 
+                _logger.LogInformation("OCR Text to index: {OcrText}", documentDto.OcrText);
+                // Index the document in Elasticsearch
+                try
+                {
+                    var elasticDocument = new
+                    {
+                        createdDocument.Id,
+                        createdDocument.Title,
+                        createdDocument.FilePath,
+                        createdDocument.CreatedAt,
+                        createdDocument.UpdatedAt,
+                        OcrText = documentDto.OcrText ?? ""
+                    };
+
+                    var indexResponse = await _elasticClient.IndexAsync(elasticDocument, i => i.Index("documents"));
+
+                    if (!indexResponse.IsValidResponse)
+                    {
+                        _logger.LogError("Failed to index document in Elasticsearch. Debug Info: {DebugInfo}", indexResponse.DebugInformation);
+                        return StatusCode(500, new { error = "Error indexing document in Elasticsearch." });
+                    }
+
+                    _logger.LogInformation("Document indexed successfully in Elasticsearch with ID: {Id}", createdDocument.Id);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error indexing document in Elasticsearch.");
+                    return StatusCode(500, new { error = $"Error indexing document in Elasticsearch: {ex.Message}" });
+                }
+
                 return CreatedAtAction(nameof(GetById), new { id = createdDocument.Id }, createdDocument);
             }
 
@@ -139,8 +173,38 @@ namespace REST_API.Controllers
             var document = _mapper.Map<Document>(documentDto);
             var response = await client.PutAsJsonAsync($"/api/document/{id}", document);
 
+            _logger.LogInformation("OCR Text to index: {OcrText}", document.OcrText);
             if (response.IsSuccessStatusCode)
             {
+                // Re-index the updated document in Elasticsearch
+                try
+                {
+                    var elasticDocument = new
+                    {
+                        document.Id,
+                        document.Title,
+                        document.FilePath,
+                        document.CreatedAt,
+                        document.UpdatedAt,
+                        OcrText = document.OcrText
+                    };
+
+                    var indexResponse = await _elasticClient.IndexAsync(elasticDocument, i => i.Index("documents"));
+
+                    if (!indexResponse.IsValidResponse)
+                    {
+                        _logger.LogError("Failed to update document in Elasticsearch. Debug Info: {DebugInfo}", indexResponse.DebugInformation);
+                        return StatusCode(500, new { error = "Error updating document in Elasticsearch." });
+                    }
+
+                    _logger.LogInformation("Document updated successfully in Elasticsearch with ID: {Id}", document.Id);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error updating document in Elasticsearch.");
+                    return StatusCode(500, new { error = $"Error updating document in Elasticsearch: {ex.Message}" });
+                }
+
                 return NoContent();
             }
 
@@ -184,7 +248,110 @@ namespace REST_API.Controllers
                 _logger.LogError(ex, "Error deleting file {FilePath} from MinIO.", document.FilePath);
             }
 
+            // Delete the document from Elasticsearch
+            try
+            {
+                var elasticResponse = await _elasticClient.DeleteAsync(new DeleteRequest("documents", id.ToString()));
+
+                if (elasticResponse.IsValidResponse)
+                {
+                    _logger.LogInformation("Document with ID {Id} deleted successfully from Elasticsearch.", id);
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to delete document with ID {Id} from Elasticsearch. Debug Info: {DebugInfo}", id, elasticResponse.DebugInformation);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting document with ID {Id} from Elasticsearch.", id);
+            }
+
             return NoContent();
+        }
+
+        [HttpPost("search/querystring")]
+        public async Task<IActionResult> SearchByQueryString([FromBody] string searchTerm)
+        {
+            _logger.LogInformation("SearchByQueryString called with term: {SearchTerm}", searchTerm);
+
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                _logger.LogWarning("Search term is empty or null.");
+                return BadRequest(new { message = "Search term cannot be empty" });
+            }
+
+            try
+            {
+                var response = await _elasticClient.SearchAsync<Document>(s => s
+                    .Index("documents")
+                    .Query(q => q.QueryString(qs => qs.Query($"*{searchTerm}*"))));
+
+                if (response.IsValidResponse)
+                {
+                    _logger.LogInformation("Elasticsearch response valid. Found {Count} documents.", response.Documents.Count);
+
+                    if (response.Documents.Any())
+                    {
+                        return Ok(response.Documents);
+                    }
+
+                    _logger.LogInformation("No documents found for search term: {SearchTerm}", searchTerm);
+                    return Ok(new List<Document>()); // Return an empty list with 200 OK
+                }
+
+                _logger.LogError("Invalid response from Elasticsearch for term: {SearchTerm}. Debug Info: {DebugInfo}", searchTerm, response.DebugInformation);
+                return StatusCode(500, new { message = "Elasticsearch query failed", details = response.DebugInformation });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception occurred while searching with term: {SearchTerm}", searchTerm);
+                return StatusCode(500, new { message = "An error occurred while performing the search", details = ex.Message });
+            }
+        }
+
+        [HttpPost("search/fuzzy")]
+        public async Task<IActionResult> SearchByFuzzy([FromBody] string searchTerm)
+        {
+            _logger.LogInformation("SearchByFuzzy called with term: {SearchTerm}", searchTerm);
+
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                _logger.LogWarning("Search term is empty or null.");
+                return BadRequest(new { message = "Search term cannot be empty" });
+            }
+
+            try
+            {
+                var response = await _elasticClient.SearchAsync<Document>(s => s
+                    .Index("documents")
+                    .Query(q => q.Match(m => m
+                        .Field(f => f.OcrText)
+                        .Query(searchTerm)
+                        .Fuzziness(new Fuzziness(2))
+                    )));
+
+                if (response.IsValidResponse)
+                {
+                    _logger.LogInformation("Elasticsearch response valid. Found {Count} documents.", response.Documents.Count);
+
+                    if (response.Documents.Any())
+                    {
+                        return Ok(response.Documents);
+                    }
+
+                    _logger.LogInformation("No documents found for fuzzy search term: {SearchTerm}", searchTerm);
+                    return Ok(new List<Document>()); // Return an empty list with 200 OK
+                }
+
+                _logger.LogError("Invalid response from Elasticsearch for fuzzy term: {SearchTerm}. Debug Info: {DebugInfo}", searchTerm, response.DebugInformation);
+                return StatusCode(500, new { message = "Failed to perform fuzzy search", details = response.DebugInformation });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception occurred while performing fuzzy search with term: {SearchTerm}", searchTerm);
+                return StatusCode(500, new { message = "An error occurred while performing the search", details = ex.Message });
+            }
         }
     }
 }

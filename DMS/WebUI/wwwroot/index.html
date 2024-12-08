@@ -4,56 +4,249 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Custom styles */
-        .bg-simple {
-            background-color: lightgrey; /* Light gray background */
-            padding: 20px; /* Add some padding */
-            border-radius: 5px; /* Round corners */
+        /* General styles */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f5; /* Light background for bottom section */
         }
-        .f-m {
-            font-size: 1.4rem;
+
+        .header-container {
+            max-width: 1216px;
+            width: 100%;
+            display: flex;
+            align-items: center;
         }
-        .margin-top {
-            margin-top: 50px;
+
+        /* Dark top section */
+        .dark-section {
+            background-color: #27272a; /* Dark background */
+            color: white; /* White text */
+            padding: 50px 0; /* Spacing */
+            text-align: center; /* Center align text */
         }
+
+        /* Middle box and document list section */
+        .middle-box {
+            background-color: white; /* White background */
+            border-radius: 10px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            padding: 20px; /* Padding inside box */
+            margin: -50px auto 20px; /* Center the section */
+            width: 90%; /* Default width for smaller screens */
+            max-width: 768px; /* Maximum width for larger screens */
+        }
+        .document-list-section {
+            background-color: white; /* White background */
+            border-radius: 10px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            padding: 20px; /* Padding inside box */
+            margin: 50px auto 20px; /* Center the section */
+            width: 90%; /* Default width for smaller screens */
+            max-width: 768px; /* Maximum width for larger screens */
+        }
+
+        /* Media query for medium screens (tablet-sized) */
+        @media (min-width: 768px) {
+            .middle-box, .document-list-section {
+                width: 60%; /* Increase width for medium screens */
+            }
+        }
+
+        /* Media query for larger screens */
+        @media (min-width: 992px) {
+            .middle-box, .document-list-section {
+                width: 60%; /* Larger screens get 50% width */
+            }
+        }
+
+        /* Custom styles for alerts */
+        #alertContainer {
+            margin: 20px auto;
+            width: 90%;
+            max-width: 600px; /* Align with section widths */
+            text-align: center;
+        }
+
+        
+        /* Custom button style */
+
+        .btn-main {
+            background-color: #059669; /* Main color */
+            color: white; /* White text for contrast */
+            border: 1px solid #047857; /* Slightly darker border for depth */
+        }
+
+        /* Add hover effect */
+        .btn-main:hover {
+            background-color: #047857; /* Darker green on hover */
+            color: white; /* Keep text white on hover */
+        }
+
+        /* Add focus effect */
+        .btn-main:focus {
+            box-shadow: 0 0 0 0.2rem rgba(5, 150, 105, 0.5); /* Subtle green outline for focus */
+        }
+
+        .btn-light-gray {
+            background-color: #e0e0e0; /* Light gray background */
+            color: #333; /* Darker text for contrast */
+            border: 1px solid #ccc; /* Subtle border */
+        }
+
+        /* Add hover effect */
+        .btn-light-gray:hover {
+            background-color: #d6d6d6; /* Slightly darker gray on hover */
+            color: #000; /* Darker text on hover */
+        }
+
+        /* Add focus effect */
+        .btn-light-gray:focus {
+            box-shadow: 0 0 0 0.2rem rgba(128, 128, 128, 0.5); /* Subtle focus outline */
+        }
+
+        .btn-deep-red {
+            background-color: #a83d3d; /* Deep red color */
+            color: white; /* White text for contrast */
+            border: 1px solid #8b3232; /* Slightly darker border for depth */
+        }
+
+        /* Add hover effect */
+        .btn-deep-red:hover {
+            background-color: #8b3232; /* Darker red on hover */
+            color: white; /* Keep text white on hover */
+        }
+
+        /* Add focus effect */
+        .btn-deep-red:focus {
+            box-shadow: 0 0 0 0.2rem rgba(168, 61, 61, 0.5); /* Subtle red outline for focus */
+        }
+
+        @font-face {
+            font-family: 'SF UI Display Heavy'; /* Custom font name */
+            src: url('fonts/sf-ui-display-heavy.otf') format('opentype'); /* Path and format */
+            font-weight: 700; /* Heavy is typically bold */
+            font-style: normal; /* Normal style */
+        }
+
+        @font-face {
+            font-family: 'SF UI Display Medium'; /* Custom font name */
+            src: url('fonts/sf-ui-display-medium.otf') format('opentype'); /* Path and format */
+            font-weight: 500; /* Medium weight */
+            font-style: normal; /* Normal style */
+        }
+
+        /* Use SF UI Display Heavy */
+        h1, h2, h3 {
+            font-family: 'SF UI Display Heavy', sans-serif;
+        }
+
+        /* Use SF UI Display Medium */
+        p, span, small, h4, h5 {
+            font-family: 'SF UI Display Medium', sans-serif;
+        }
+
+        input::placeholder {
+            font-family: 'SF UI Display Medium', sans-serif; /* Apply the desired font */
+            font-size: 14px; /* Adjust font size if needed */
+            color: #888; /* Optional: Change the color of placeholder text */
+        }
+
+        /* Style the file input button */
+        input[type="file"]::file-selector-button {
+            font-family: 'SF UI Display Medium', sans-serif;
+            font-size: 14px;
+            background-color: #e0e0e0;
+            color: #333; /* text */
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Change button style on hover */
+        input[type="file"]::file-selector-button:hover {
+            background-color: #d6d6d6; /* Darker */
+            color: #000; /* Darker text on hover */
+        }
+
+        /* Optional: Change the entire input field */
+        input[type="file"] {
+            font-family: 'SF UI Display Medium', sans-serif;
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* Change input field focus and hover border color to green */
+        .form-control:focus, .form-control:hover {
+            border-color: #059669; /* Green border */
+            box-shadow: 0 0 5px rgba(5, 150, 105, 0.5); /* Green glow effect */
+        }
+
     </style>
     <script src="app.js" defer></script>
 </head>
 <body>
-    <div class="container mt-5">
-
-        <!-- Page Title -->
-        <h1 class="text-center">Document Management System</h1>
-
-        <!-- Documents List Section -->
-        <h2 class="f-m mt-4">Documents</h2>
-        <div id="documentList" class="list-group mb-4 bg-simple"></div>
-
-        <!-- Add and Delete Document Sections in Two Columns -->
-        <div class="">
-            <h3 class="f-m">Add Document</h3>
-
-            <div class="bg-simple">
-                <div class="form-group">
-                    <input type="text" id="docTitle" class="form-control" placeholder="Document Title" required />
-                </div>
-                <!--<div class="form-group">
-                    <textarea id="docContent" class="form-control" placeholder="Document Content" required></textarea>
-                </div>-->
-                <div class="form-group">
-                    <input type="file" id="docFile" class="form-control-file" required />
-                </div>
-                <button id="addDocumentButton" class="btn btn-primary text-uppercase">Add</button>
-            </div>
+    <!-- Header Section -->
+    <div class="d-flex align-items-center justify-content-center p-3" style="background-color: #27272a; color: white;">
+        <div class="header-container">
+            <i class="fas fa-file-alt fa-lg ml-5 mr-2" style="color: #059669; font-size: 1.6rem;"></i>
+            <span style="font-size: 1.2rem;">Document Management System</span>
         </div>
+    </div>
 
-        <!-- Alert Container -->
-        <div id="alertContainer" class="mb-4 mt-4"></div>
+    <!-- Dark Top Section -->
+    <div class="dark-section">
 
     </div>
 
+    <!-- Middle Box -->
+    <div class="middle-box">
+        <div class="bg-simple">
+            <div class="form-group">
+                <input type="text" id="docTitle" class="form-control" placeholder="Document Title" required />
+            </div>
+            <!-- File input and Add button in the same row -->
+            <div class="form-group d-flex align-items-center justify-content-between mb-0">
+                <!-- File Input -->
+                <input type="file" id="docFile" class="form-control-file" required />
+
+                <!-- Add Button -->
+                <button id="addDocumentButton" class="btn btn-main">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="alertContainer"></div>
+
+    <!-- Document List Section -->
+    <div class="document-list-section">
+        <!-- Search and Refresh Section -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="input-group flex-grow-1">
+                <input type="text"
+                       id="searchBox"
+                       class="form-control"
+                       placeholder="Search documents..."
+                       aria-label="Search documents" />
+                <div class="input-group-append">
+                    <button id="searchButton" class="btn btn-light-gray px-2 py-1">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+            <button id="refreshButton"
+                    class="btn btn-light-gray ml-4 px-2 py-1">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+        <!-- Document List -->
+        <div id="documentList" class="list-group mb-4"></div>
+    </div>
 
     <!-- Modal to Display OCR Text -->
     <div class="modal fade" id="ocrTextModal" tabindex="-1" role="dialog" aria-labelledby="ocrTextModalLabel" aria-hidden="true">
@@ -66,7 +259,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p id="ocrTextContent">Loading...</p> <!-- The OCR Text will be displayed here -->
+                    <p id="ocrTextContent">Loading...</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -74,7 +267,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- Edit Document Modal -->
     <div class="modal fade" id="editDocumentModal" tabindex="-1" role="dialog" aria-labelledby="editDocumentModalLabel" aria-hidden="true">
@@ -103,8 +295,6 @@
             </div>
         </div>
     </div>
-
-
 
     <!-- Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

@@ -15,6 +15,7 @@ using DAL.Entities;
 using Moq.Protected;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Logging;
+using Elastic.Clients.Elasticsearch;
 
 namespace DMS.Tests.REST_API.Tests
 {
@@ -24,6 +25,7 @@ namespace DMS.Tests.REST_API.Tests
         private readonly Mock<IMapper> _mapperMock;
         private readonly Mock<IMessageQueueService> _messageQueueServiceMock;
         private readonly Mock<FileController> _fileControllerMock;
+        private readonly Mock<ElasticsearchClient> _elasticClientMock;
         private readonly DocumentController _controller;
 
         public DocumentControllerTests()
@@ -32,12 +34,14 @@ namespace DMS.Tests.REST_API.Tests
             _mapperMock = new Mock<IMapper>();
             _messageQueueServiceMock = new Mock<IMessageQueueService>();
             _fileControllerMock = new Mock<FileController>(MockBehavior.Strict, null);
+            _elasticClientMock = new Mock<ElasticsearchClient>();
 
             _controller = new DocumentController(
                 _httpClientFactoryMock.Object,
                 _mapperMock.Object,
                 _messageQueueServiceMock.Object,
                 _fileControllerMock.Object,
+                _elasticClientMock.Object,
                 Mock.Of<ILogger<DocumentController>>()); 
         }
 
@@ -46,15 +50,15 @@ namespace DMS.Tests.REST_API.Tests
         {
             // Arrange
             var documents = new List<Document>
-    {
-        new Document { Id = 1, Title = "Test Document 1" },
-        new Document { Id = 2, Title = "Test Document 2" }
-    };
-            var dtoDocuments = new List<DocumentDTO>
-    {
-        new DocumentDTO { Id = 1, Title = "Test Document 1" },
-        new DocumentDTO { Id = 2, Title = "Test Document 2" }
-    };
+            {
+                new Document { Id = 1, Title = "Test Document 1" },
+                new Document { Id = 2, Title = "Test Document 2" }
+            };
+                    var dtoDocuments = new List<DocumentDTO>
+            {
+                new DocumentDTO { Id = 1, Title = "Test Document 1" },
+                new DocumentDTO { Id = 2, Title = "Test Document 2" }
+            };
 
             var jsonResponse = JsonSerializer.Serialize(documents);
 

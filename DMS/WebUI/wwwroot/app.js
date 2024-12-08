@@ -17,55 +17,7 @@ async function fetchDocuments() {
             documentList.innerHTML = 'No documents found!';
         } else {
             documents.forEach(doc => {
-                const card = document.createElement('div');
-                card.className = 'card mb-3'; // Bootstrap card class
-
-                // Card body
-                card.innerHTML = `
-                    <div class="card-body">
-                        <div class="row">
-                            <!-- First Column for Title, Content, and OCR Text -->
-                            <div class="col-md-8">
-                                <h5 class="card-title">${doc.title}</h5>
-                                <!-- ${doc.ocrText
-                                    ? `<p class="card-text"><strong>OCR Text:</strong> ${doc.ocrText}</p>`
-                                    : '<p class="card-text text-muted">OCR Text: Not available</p>'} -->
-                                <!-- Button to open modal -->
-                                ${doc.ocrText
-                        ? `<button class="btn btn-info" onclick="showOcrText('${doc.ocrText}')">View OCR Text</button>`
-                        : ''}
-                            </div>
-
-                            <!-- Second Column for Metadata and Buttons -->
-                            <div class="col-md-4 border-left">
-                                <div class="row">
-                                    <div class="col text-right">
-                                        <small class="text-muted">ID: ${doc.id}</small>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col text-right">
-                                        <small class="text-muted">Created at: ${formatDate(doc.createdAt)}</small>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col text-right">
-                                        <small class="text-muted">
-                                            Last updated at: ${doc.updatedAt ? formatDate(doc.updatedAt) : '-'}
-                                        </small>
-                                    </div>
-                                </div>
-                                <div class="row mt-auto">
-                                    <div class="col text-right margin-top">
-                                        <!-- Delete Button -->
-                                        <button class="btn btn-danger text-uppercase" onclick="deleteDocument(${doc.id})">Delete</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                documentList.appendChild(card);
+                documentList.innerHTML += createDocumentCard(doc); // Use the reusable function
             });
         }
     } catch (error) {
@@ -225,6 +177,59 @@ async function deleteDocument(id) {
 //    }
 //});
 
+// Search and display filtered documents
+async function searchDocuments() {
+    const searchBox = document.getElementById('searchBox');
+    const searchTerm = searchBox.value.trim();
+
+    if (!searchTerm) {
+        showAlert('Please enter a search term.', 'warning');
+        return;
+    }
+
+    const documentList = document.getElementById('documentList');
+    documentList.innerHTML = 'Loading...';
+
+    try {
+        // Perform normal search
+        let response = await fetch(`${apiUrl}/document/search/querystring`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(searchTerm),
+        });
+
+        let documents = await response.json();
+
+        // If no results, fallback to fuzzy search
+        if (documents.length === 0) {
+            response = await fetch(`${apiUrl}/document/search/fuzzy`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(searchTerm),
+            });
+
+            if (!response.ok) {
+                throw new Error('Fuzzy search failed. Please try again.');
+            }
+
+            documents = await response.json();
+        }
+
+        documentList.innerHTML = '';
+
+        if (documents.length === 0) {
+            documentList.innerHTML = 'No matching documents found.';
+        } else {
+            documents.forEach(doc => {
+                documentList.innerHTML += createDocumentCard(doc);
+            });
+        }
+    } catch (error) {
+        console.error('Error during search:', error);
+        showAlert(`Error searching documents: ${error.message}`, 'danger');
+    }
+}
+
 function showAlert(messages, type) {
     const alertContainer = document.getElementById('alertContainer');
     const alertDiv = document.createElement('div');
@@ -256,7 +261,68 @@ function showAlert(messages, type) {
     }, 5000);
 }
 
+// Function to create a card for a document
+function createDocumentCard(doc) {
+    return `
+        <div class="card mb-3">
+            <div class="card-body pb-2">
+                <div class="row align-items-center">
+                    <!-- Title -->
+                    <div class="col-md-8">
+                        <h5 class="card-title">${doc.title}</h5>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="col-md-4 text-right">
+                        <button class="btn btn-light-gray px-2 py-1 mr-2" onclick="downloadDocument(${doc.id})">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button class="btn btn-deep-red px-2 py-1" onclick="deleteDocument(${doc.id})">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Horizontal Divider -->
+                <hr class="mt-4 mb-2" />
+
+                <!-- Metadata Row -->
+                <div class="row mb-0">
+                    <!-- ID -->
+                    <div class="col text-left">
+                        <small class="text-muted">ID: ${doc.id}</small>
+                    </div>
+
+                    <!-- Created At -->
+                    <div class="col text-right">
+                        <small class="text-muted">Created at: ${formatDate(doc.createdAt)}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+
 window.onload = async () => {
     await fetchDocuments();
     document.getElementById('addDocumentButton').addEventListener('click', addDocument);
+
+    document.getElementById('searchButton').addEventListener('click', searchDocuments);
+
+    // trigger search on Enter key press in the search box
+    document.getElementById('searchBox').addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            searchDocuments();
+        }
+    });
+
+    document.getElementById("refreshButton").addEventListener("click", function () {
+        document.getElementById("searchBox").value = "";
+        const documentList = document.getElementById("documentList");
+        documentList.innerHTML = '';
+        fetchDocuments();
+    });
+
 };

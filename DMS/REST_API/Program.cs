@@ -9,6 +9,7 @@ using FluentValidation.AspNetCore;
 using REST_API.Services;
 using System.Diagnostics.CodeAnalysis;
 using REST_API.Controllers;
+using Elastic.Clients.Elasticsearch;
 
 namespace REST_API
 {
@@ -51,12 +52,19 @@ namespace REST_API
 
             builder.Services.AddScoped<FileController>();
 
+            builder.Services.AddHttpClient("REST", client =>
+            {
+                client.BaseAddress = new Uri("http://rest_api:8080");
+            });
+
             builder.Services.AddHttpClient("DAL", client =>
             {
                 client.BaseAddress = new Uri("http://dal:8081");
             });
 
-
+            var elasticUri = builder.Configuration.GetConnectionString("ElasticSearch") ?? "http://localhost:9200";
+            builder.Services.AddSingleton(new ElasticsearchClient(new Uri(elasticUri)));
+            builder.Services.AddSingleton<ElasticsearchInitializer>();
 
             // Add controllers
             builder.Services.AddControllers();
@@ -75,6 +83,10 @@ namespace REST_API
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<DocumentContext>();
                 dbContext.Database.EnsureCreated();
+
+                // Elasticsearch initialization
+                var elasticsearchInitializer = scope.ServiceProvider.GetRequiredService<ElasticsearchInitializer>();
+                elasticsearchInitializer.InitializeAsync().Wait();
             }
 
             // Configure the HTTP request pipeline.
