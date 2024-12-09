@@ -353,5 +353,28 @@ namespace REST_API.Controllers
                 return StatusCode(500, new { message = "An error occurred while performing the search", details = ex.Message });
             }
         }
+
+        [HttpGet("download/{id}")]
+        public async Task<IActionResult> DownloadDocument(int id)
+        {
+            // Fetch document details from DAL
+            var client = _httpClientFactory.CreateClient("DAL");
+            var response = await client.GetAsync($"/api/document/{id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return CreateErrorResponse("Error retrieving document from DAL", (int)response.StatusCode);
+            }
+
+            var document = await response.Content.ReadFromJsonAsync<Document>();
+            if (document == null || string.IsNullOrEmpty(document.FilePath))
+            {
+                return NotFound(new { error = "Document not found or no associated file path." });
+            }
+
+            // Use FileController to download the file from MinIO
+            return await _fileController.DownloadFile(document.FilePath);
+        }
+
     }
 }

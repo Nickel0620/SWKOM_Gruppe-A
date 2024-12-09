@@ -274,7 +274,7 @@ function createDocumentCard(doc) {
 
                     <!-- Buttons -->
                     <div class="col-md-4 text-right">
-                        <button class="btn btn-light-gray px-2 py-1 mr-2" onclick="downloadDocument(${doc.id})">
+                        <button class="btn btn-light-gray px-2 py-1 mr-2" onclick="downloadDocument(${doc.id}, '${doc.filePath}')">
                             <i class="fas fa-download"></i>
                         </button>
                         <button class="btn btn-deep-red px-2 py-1" onclick="deleteDocument(${doc.id})">
@@ -303,6 +303,34 @@ function createDocumentCard(doc) {
     `;
 }
 
+async function downloadDocument(documentId, filePath) {
+    try {
+        const response = await fetch(`${apiUrl}/document/download/${documentId}`);
+
+        if (!response.ok) {
+            const error = await response.json();
+            showAlert(`Error downloading document: ${error.message}`, 'danger');
+            return;
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+
+        // Use the provided filePath for the filename
+        const fileName = filePath.split('/').pop(); // Extract the file name from the file path
+        a.download = fileName;
+
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error downloading document:', error);
+        showAlert(`Error downloading document: ${error.message}`, 'danger');
+    }
+}
 
 window.onload = async () => {
     await fetchDocuments();
