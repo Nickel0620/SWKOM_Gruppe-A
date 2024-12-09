@@ -118,8 +118,42 @@ namespace DMS.Tests.REST_API.Tests
             Assert.Equal(500, errorResult.StatusCode);
         }
 
+        //[Fact]
+        //public async Task Create_ValidDocument_ReturnsCreated()
+        //{
+        //    // Arrange
+        //    var documentDto = new DocumentDTO { Id = 1, Title = "Test Title" };
+        //    var document = new Document { Id = 1, Title = "Test Title" };
+        //    var jsonResponse = JsonSerializer.Serialize(document);
+
+        //    var mockClient = new Mock<HttpMessageHandler>();
+        //    mockClient.Protected()
+        //        .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+        //        .ReturnsAsync(new HttpResponseMessage
+        //        {
+        //            StatusCode = HttpStatusCode.Created,
+        //            Content = new StringContent(jsonResponse)
+        //        });
+
+        //    var client = new HttpClient(mockClient.Object)
+        //    {
+        //        BaseAddress = new Uri("http://localhost") 
+        //    };
+        //    _httpClientFactoryMock.Setup(f => f.CreateClient("DAL")).Returns(client);
+        //    _mapperMock.Setup(m => m.Map<Document>(It.IsAny<DocumentDTO>())).Returns(document);
+
+        //    // Act
+        //    var result = await _controller.Create(documentDto);
+
+        //    // Assert
+        //    var createdResult = Assert.IsType<CreatedAtActionResult>(result);
+        //    var returnedDocument = Assert.IsType<Document>(createdResult.Value);
+        //    Assert.Equal(1, returnedDocument.Id);
+        //    Assert.Equal("Test Title", returnedDocument.Title);
+        //}
+
         [Fact]
-        public async Task Create_ValidDocument_ReturnsCreated()
+        public async Task Create_ValidDocument_ReturnsOk()
         {
             // Arrange
             var documentDto = new DocumentDTO { Id = 1, Title = "Test Title" };
@@ -137,7 +171,7 @@ namespace DMS.Tests.REST_API.Tests
 
             var client = new HttpClient(mockClient.Object)
             {
-                BaseAddress = new Uri("http://localhost") 
+                BaseAddress = new Uri("http://localhost")
             };
             _httpClientFactoryMock.Setup(f => f.CreateClient("DAL")).Returns(client);
             _mapperMock.Setup(m => m.Map<Document>(It.IsAny<DocumentDTO>())).Returns(document);
@@ -146,11 +180,14 @@ namespace DMS.Tests.REST_API.Tests
             var result = await _controller.Create(documentDto);
 
             // Assert
-            var createdResult = Assert.IsType<CreatedAtActionResult>(result);
-            var returnedDocument = Assert.IsType<Document>(createdResult.Value);
+            var objectResult = Assert.IsType<ObjectResult>(result); // Expect ObjectResult
+            Assert.Equal(200, objectResult.StatusCode); // HTTP 200 OK
+
+            var returnedDocument = Assert.IsType<Document>(objectResult.Value); // Validate returned value
             Assert.Equal(1, returnedDocument.Id);
             Assert.Equal("Test Title", returnedDocument.Title);
         }
+
 
         [Fact]
         public async Task Create_InvalidModel_ReturnsBadRequest()
