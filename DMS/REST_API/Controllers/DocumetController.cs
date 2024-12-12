@@ -65,22 +65,46 @@ namespace REST_API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var client = _httpClientFactory.CreateClient("DAL");
-            var response = await client.GetAsync($"/api/document/{id}");
-
-            if (response.IsSuccessStatusCode)
+            // Validate input
+            if (id <= 0)
             {
-                var document = await response.Content.ReadFromJsonAsync<Document>();
-                if (document != null)
-                {
-                    var dtoDocument = _mapper.Map<DocumentDTO>(document);
-                    return Ok(dtoDocument);
-                }
-
-                return NotFound(new { error = "Document not found" });
+                return BadRequest(new { error = "Invalid document ID." });
             }
 
-            return CreateErrorResponse("Error retrieving document from DAL", (int)response.StatusCode);
+            try
+            {
+                var client = _httpClientFactory.CreateClient("DAL");
+                var response = await client.GetAsync($"/api/document/{id}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var document = await response.Content.ReadFromJsonAsync<Document>();
+                    if (document != null)
+                    {
+                        var dtoDocument = _mapper.Map<DocumentDTO>(document);
+                        return Ok(dtoDocument);
+                    }
+
+                    return NotFound(new { error = "Document not found" });
+                }
+                else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    // Handle not found response from DAL explicitly
+                    return NotFound(new { error = "Document not found" });
+                }
+                else
+                {
+                    // Handle other non-successful responses
+                    _logger.LogError("Error retrieving document from DAL. Status code: {StatusCode}, Reason: {ReasonPhrase}",
+                                     (int)response.StatusCode, response.ReasonPhrase);
+                    return CreateErrorResponse("Error retrieving document from DAL", (int)response.StatusCode);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving the document with ID: {Id}", id);
+                return StatusCode(500, new { error = "An unexpected error occurred while retrieving the document." });
+            }
         }
 
         [HttpPost]
